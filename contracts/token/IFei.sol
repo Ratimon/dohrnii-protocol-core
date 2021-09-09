@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "../openzeppelin/token/ERC20/IERC20.sol";
+
 
 /// @title FEI stablecoin interface
 /// @author Fei Protocol

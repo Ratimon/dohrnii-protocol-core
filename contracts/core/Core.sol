@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "../openzeppelin/proxy/utils/Initializable.sol";
+
 import "./Permissions.sol";
 import "./ICore.sol";
 import "../token/Fei.sol";

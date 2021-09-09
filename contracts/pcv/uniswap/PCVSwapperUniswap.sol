@@ -7,10 +7,10 @@ import "../../utils/Incentivized.sol";
 import "../../refs/OracleRef.sol";
 import "../../utils/Timed.sol";
 import "../../external/UniswapV2Library.sol";
-import "@openzeppelin/contracts/utils/math/Math.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
+import "../../openzeppelin/utils/math/Math.sol";
+import "../../openzeppelin/token/ERC20/extensions/IERC20Metadata.sol";
+import "../../openzeppelin/token/ERC20/utils/SafeERC20.sol";
+import "../../external/uniswap/core/interfaces/IUniswapV2Pair.sol";
 
 /// @title implementation for PCV Swapper that swaps ERC20 tokens on Uniswap
 /// @author eswak

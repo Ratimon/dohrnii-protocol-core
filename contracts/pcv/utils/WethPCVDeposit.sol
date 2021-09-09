@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.0;
 
-import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
+import "../../external/uniswap/periphery/interfaces/IWETH.sol";
 import "../PCVDeposit.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
+import "../../openzeppelin/utils/Address.sol";
 
 /// @title base class for a WethPCVDeposit PCV Deposit
 /// @author Fei Protocol

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "./ReserveStabilizer.sol";
-import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
+import "../external/uniswap/periphery/interfaces/IWETH.sol";
 
 /// @title implementation for an ETH Reserve Stabilizer
 /// @author Fei Protocol

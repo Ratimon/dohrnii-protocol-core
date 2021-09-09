@@ -3,7 +3,8 @@ pragma solidity ^0.8.4;
 
 import "../refs/CoreRef.sol";
 import "./IPCVDeposit.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "../openzeppelin/token/ERC20/utils/SafeERC20.sol";
+
 
 /// @title abstract contract for withdrawing ERC-20 tokens using a PCV Controller
 /// @author Fei Protocol

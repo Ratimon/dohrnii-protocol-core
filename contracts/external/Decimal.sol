@@ -14,7 +14,7 @@
 
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "../openzeppelin/utils/math/SafeMath.sol";
 
 /**
  * @title Decimal

@@ -3,7 +3,7 @@ pragma solidity ^0.8.4;
 
 import "./IOracle.sol";
 import "../refs/CoreRef.sol";
-import "@chainlink/contracts/src/v0.6/interfaces/AggregatorV3Interface.sol";
+import "../external/chainlink/v0.8/interfaces/AggregatorV3Interface.sol";
 
 /// @title Chainlink oracle wrapper
 /// @author eswak

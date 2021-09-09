@@ -3,8 +3,8 @@ pragma solidity ^0.8.4;
 
 import "./IOracleRef.sol";
 import "./CoreRef.sol";
-import "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "../openzeppelin/utils/math/SafeCast.sol";
+import "../openzeppelin/token/ERC20/extensions/IERC20Metadata.sol";
 
 /// @title Reference to an Oracle
 /// @author Fei Protocol
