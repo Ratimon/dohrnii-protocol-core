@@ -75,8 +75,6 @@ const config: HardhatUserConfig = {
 
 
 
-
-
   },
 
   networks: {
@@ -132,22 +130,6 @@ const config: HardhatUserConfig = {
 
     },
 
-    bscTestnet2: {
-      url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
-      // url: "https://data-seed-prebsc-1-s2.binance.org:8545/",
-      chainId: 97,
-      gasPrice: 10000000000,
-      // accounts: [`0x${PRIVATE_KEY}`]
-      accounts: {
-        count: 10,
-        initialIndex: 0,
-        mnemonic: `${MNEMONIC}`,
-        path: "m/44'/60'/0'/0",
-      },
-
-      tags: ["staging"]
-
-    },
 
     bscMainnet: {
       url: "https://bsc-dataseed.binance.org/",
