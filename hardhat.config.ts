@@ -38,35 +38,30 @@ const RPC_ENDPOINT= process.env.CHAINSTACK_RPC_ENDPOINT;
 const config: HardhatUserConfig = {
   namedAccounts: {
     deployer: 0,
-    lender: 1,
-    borrower: 2,
-    receiver: 3,
-    liquidator: 4,
-    user1: 5,
-    borrower2: 6,
+    dev: 1,
 
     zero: "0x0000000000000000000000000000000000000000",
      ///-------------------/deploy---tokens-------------------///
 
     busd: {
-      31337: "0xd5864478983F7fdA66239D2B85FA7CF75a4B71f9", // Mapped from  BUSDTest Contract
+      31337: "0xd5864478983F7fdA66239D2B85FA7CF75a4B71f9", 
       56: "0xe9e7cea3dedca5984780bafc599bd69add087d56", //Mapped from  https://bscscan.com/address/0xe9e7cea3dedca5984780bafc599bd69add087d56
       97: "0x2a7b39f35fA3e0bFBFD0136E43Cb9c7feb6625Cc",
     },
 
-    eth: {
-      31337: "0xC9F4AC0f1998223b9a9726e6EbF3F5043433DD33", // Mapped from  GASHTest Contract
+    weth: {
+      31337: "0xC9F4AC0f1998223b9a9726e6EbF3F5043433DD33", 
       56: "0x2170ed0880ac9a755fd29b2688956bd959f933f8", //TODO
       97: "0xA3234ceaaf5877239738a71B1ea24b86f8EF7D5C",
     },
 
     usdt: {
-      31337: "0x2865941758E4530407B09920c51Cce5e0EA9B7bD", // Mapped from  GASHTest Contract
+      31337: "0x2865941758E4530407B09920c51Cce5e0EA9B7bD", 
       56: "0x55d398326f99059ff775485246999027b3197955", //TODO
       97: "0xd8f40b596bf1a519478888443be550f65c2ca42e",
     },
 
-    wbase: {
+    wbnb: {
       31337: "0x63C628733E650d813D2511b7c34695e1eD496361", // Mapped from  WBASE Contract
       56: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", //TODO
       97: "0xEDCC8D4604691CdA5461b9fB42053005Da511588",
@@ -114,7 +109,7 @@ const config: HardhatUserConfig = {
     // },
 
     bscTestnet: {
-      url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
+      url: "https://data-seed-prebsc-1-s3.binance.org:8545/",
       // url: "https://data-seed-prebsc-1-s2.binance.org:8545/",
       chainId: 97,
       gasPrice: 10000000000,
@@ -185,17 +180,17 @@ const config: HardhatUserConfig = {
       //     },
       //   }
       // },
+      // {
+      //   version: "0.4.0",
+      //   settings: {
+      //     optimizer: {
+      //       enabled: true,
+      //       runs: 200
+      //     }
+      //   }
+      // },
       {
-        version: "0.4.0",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200
-          }
-        }
-      },
-      {
-        version: "0.6.6",
+        version: "0.6.12",
         settings: {
           optimizer: {
             enabled: true,

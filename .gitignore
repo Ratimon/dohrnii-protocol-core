@@ -6,6 +6,7 @@
 /cache
 # /deployments
 /deployments/localhost
+/deployments/hardhat
 /dist
 /typechain
 /tmp
