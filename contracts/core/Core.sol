@@ -19,13 +19,23 @@ contract Core is ICore, Permissions, Initializable {
     /// @notice the address of the TRIBE contract
     IERC20 public override tribe;
 
-    function init() external override initializer {
+    // function init() external override initializer {
+    //     _setupGovernor(msg.sender);
+        
+    //     Fei _fei = new Fei(address(this));
+    //     _setFei(address(_fei));
+
+    //     Tribe _tribe = new Tribe(address(this), msg.sender);
+    //     _setTribe(address(_tribe));
+    // }
+
+    function init(address _fei, address _tribe) external override initializer {
         _setupGovernor(msg.sender);
         
-        Fei _fei = new Fei(address(this));
+        // Fei _fei = new Fei(address(this));
         _setFei(address(_fei));
 
-        Tribe _tribe = new Tribe(address(this), msg.sender);
+        // Tribe _tribe = new Tribe(address(this), msg.sender);
         _setTribe(address(_tribe));
     }
 
