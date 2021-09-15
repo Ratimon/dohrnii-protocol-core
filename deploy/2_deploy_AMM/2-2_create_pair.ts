@@ -33,7 +33,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log(`Network Name: ${network.name}`);
     log("----------------------------------------------------")
     
-    const syntheticAddress = (await get('Fei')).address;
+    let syntheticAddress = (await get('Fei')).address;
     let wethAddress: string
 
     if(hre.network.tags.test || hre.network.tags.staging) {
@@ -86,7 +86,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   
 };
 export default func;
-func.tags = ["2-1.5",'create-pair','AMM'];
+func.tags = ["2-2",'create-pair','AMM'];
 func.dependencies = ['2-1'];
 // module.exports.runAtTheEnd = true;
 func.skip = async function (hre: HardhatRuntimeEnvironment) {
