@@ -21,16 +21,16 @@ const {
 } = utils;
 
 
-// import jsonabi from "../../src/abis/external/pricefeeds.json";
-import jsonabi from "../../src/abis/external/liquidateCaller.json";
-// import jsonabi from "../../artifacts/contracts/caller/liquidateCaller.sol/LiquidateCaller.json";
+// import jsonabi from "../../src/abis/external/erc20.json";
+import jsonabi from "../../src/abis/external/wbnb.json";
+
 
 async function main(): Promise<void> {
     // Hardhat always runs the compile task when running scripts through it.
     // If this runs in a standalone fashion you may want to call compile manually
     // to make sure everything is compiled
     // await run("compile");
-    const name = "pricefeeds"
+    const name = "weth"
     const iface = new Interface(jsonabi);
 
     console.log('formatedAbi',iface.format(FormatTypes.full));

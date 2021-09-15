@@ -9,6 +9,7 @@ import {
 
 const { 
   formatUnits,
+  parseEther,
   parseUnits
 } = utils;
 
@@ -18,7 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if(!hre.network.tags.production) {
     
     const {deployments, getNamedAccounts, network} = hre;
-    const {deploy , log } = deployments;
+    const {deploy, execute , log } = deployments;
     const {deployer} = await getNamedAccounts();
   
     log(`Deploying contracts with the account: ${deployer}`);
@@ -36,8 +37,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     ]
 
 
-    const WETHResult = await deploy("WETH9Mock", {
-        contract: "WETH9Mock",
+    const WETHResult = await deploy("MockWeth", {
+        contract: "MockWeth",
         from: deployer,
         args: WETHArgs,
         log: true,
@@ -48,12 +49,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log("----------------------------------------------------")
     log("------------------ii---------ii---------------------")
     log("We may update these following addresses at hardhatconfig.ts ")
-    log(`WETH9Mock address: ${chalk.green(WETHResult.address)} at key weth`);
+    log(`MockETH address: ${chalk.green(WETHResult.address)} at key weth`);
     log("----------------------------------------------------")
   
     if (WETHResult.newlyDeployed) {
       
-      log(`weth contract address (WETH9Mock): ${WETHResult.address} at key weth `);
+      log(`weth contract address (MockWeth): ${WETHResult.address} at key weth `);
 
       if(hre.network.tags.production || hre.network.tags.staging){
         await hre.run("verify:verify", {

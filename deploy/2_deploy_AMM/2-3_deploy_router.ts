@@ -17,10 +17,11 @@ const {
   
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const {deployments, getNamedAccounts, network} = hre;
-    const {deploy,execute, get, log, read } = deployments;
+    const {deploy, execute, get, log, read } = deployments;
 
     const {
         deployer,
+        dev
     } = await getNamedAccounts();
     
     log(`Deploying contracts with the account: ${deployer}`);
@@ -33,78 +34,81 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log(`Network Name: ${network.name}`);
     log("----------------------------------------------------")
     
-    let syntheticAddress = (await get('Fei')).address;
+    let factoryAddress = (await get('UniswapV2Factory')).address
+    let libraryPath
     let wethAddress: string
 
     if(hre.network.tags.test || hre.network.tags.staging) {
-
         try {
 
+
+            libraryPath = "mocks/UniswapV2LibraryMock.sol:UniswapV2Library" 
             wethAddress  = (await get('MockWeth')).address;
 
         } catch  (e) {
 
             log(chalk.red('Warning: fail trying getting artifacts from deployments, now resusing addresses from hardhat.config.ts'))
             const accounts = await getNamedAccounts();
+
+            libraryPath = "amm/libraries/UniswapV2Library.sol:UniswapV2Library"
             wethAddress  =  accounts.weth;
         
         }
       }
     else if  (hre.network.tags.production) {
   
-          const accounts = await getNamedAccounts();
-          wethAddress  =  accounts.weth;
-      }
+        const accounts = await getNamedAccounts();
+        wethAddress  =  accounts.weth;
+    }
     else {
         throw "Wrong tags";
-      }
+    }
 
 
-    await execute(
-        'UniswapV2Factory',
-        {from: deployer, log: true}, 
-        "createPair",
-        syntheticAddress,
+    const LibraryResult = await deploy("UniswapV2Library", {
+        contract: `contracts/${libraryPath}`,
+        from: deployer,
+    });
+
+    const  RouterArgs : any[] =  [
+        factoryAddress,
         wethAddress
-        );
+    ];
 
-    const pairAddress = await read(
-        'UniswapV2Factory',
-        'getPair',
-        syntheticAddress,
-        wethAddress
-        
-    )
 
-    log(`The pair jas been created at: ${chalk.green(pairAddress)} `);
+    const RouterResult = await deploy("UniswapV2Router02", {
+        contract: 'UniswapV2Router02', 
+        from: deployer,
+        args: RouterArgs,
+        log: true,
+        deterministicDeployment: false,
+        libraries: {
+            UniswapV2Library: LibraryResult.address
+        }
+    });
 
+
+    log(chalk.yellow("We may update these following addresses at hardhatconfig.ts "));
     log("------------------ii---------ii---------------------")
     log("----------------------------------------------------")
     log("------------------ii---------ii---------------------")
 
 
+    if (RouterResult.newlyDeployed) {
+
+        log(`Router contract address: ${chalk.green(RouterResult.address)} at key router using ${RouterResult.receipt?.gasUsed} gas`);
+
+        if(hre.network.tags.production || hre.network.tags.staging){
+            await hre.run("verify:verify", {
+            address: RouterResult.address,
+            constructorArguments: RouterArgs,
+            });
+        }
+
+    }
   
 };
 export default func;
-func.tags = ["2-2",'create-pair','AMM'];
-func.dependencies = ['2-1'];
-// module.exports.runAtTheEnd = true;
-func.skip = async function (hre: HardhatRuntimeEnvironment) {
-    if(hre.network.tags.production || hre.network.tags.staging){
-        return true;
-    } else{
-        return false;
-    }
-};
-
-// func.skip = async function  (hre: HardhatRuntimeEnvironment) {
-//     new Promise(async (resolve, reject) => {
-//         try {
-//             const {getChainId} = hre;
-//             const chainId = await getChainId()
-//             resolve(chainId !== "31337")
-//         } catch (error) {
-//             reject(error)
-//         }
-//     }
-// }
+func.tags = ["2-3",'router','AMM'];
+func.dependencies = ['2-2'];
+// func.skip = async () => true;

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.0;
 
-import "hardhat/console.sol";
 
 
 import "./uniswap/core/interfaces/IUniswapV2Pair.sol";
@@ -21,14 +20,11 @@ library UniswapV2OracleLibrary {
         address pair
     ) internal view returns (uint price0Cumulative, uint price1Cumulative, uint32 blockTimestamp) {
 
-        console.log('pair', pair);
 
         blockTimestamp = currentBlockTimestamp();
         price0Cumulative = IUniswapV2Pair(pair).price0CumulativeLast();
         price1Cumulative = IUniswapV2Pair(pair).price1CumulativeLast();
 
-        console.log('price0Cumulative', price0Cumulative);
-        console.log('price1Cumulative', price1Cumulative);
 
 
         // if time has elapsed since the last update on the pair, mock the accumulated price values
