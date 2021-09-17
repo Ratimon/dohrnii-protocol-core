@@ -80,7 +80,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 
 
-    let ethAmountToAdd : Number = 1;
+    let ethAmountToAdd : Number = 10;
     let feiAmountToAdd : Number = 5000;
 
     const  approveArgs : any[] =  [

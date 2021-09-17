@@ -38,7 +38,7 @@ contract ReserveStabilizer is OracleRef, IReserveStabilizer, PCVDeposit {
         _oracle,
         _backupOracle,
         0, // default to zero for ETH and TRIBE which both have 18 decimals
-        true // invert the price oracle, as the operation performed here needs to convert FEI into underlying
+        true // invert the price oracle, as the operation performed here needs to convert FEI into underlying eg eth per fei
     ) {
         require(_usdPerFeiBasisPoints <= BASIS_POINTS_GRANULARITY, "ReserveStabilizer: Exceeds bp granularity");
         usdPerFeiBasisPoints = _usdPerFeiBasisPoints;
