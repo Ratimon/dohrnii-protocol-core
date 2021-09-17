@@ -1,11 +1,4 @@
 import chalk from 'chalk';
-
-// Defining bytecode and abi from original contract on mainnet to ensure bytecode matches and it produces the same pair code hash
-// const {
-//     bytecode,
-//     abi,
-//   } = require("../deployments/mainnet/UniswapV2Factory.json");
-
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
@@ -19,17 +12,11 @@ const {
     formatUnits,
 } = utils;
 
-import {
-    advanceTimeAndBlock
-} from "../../utils";
-
-
-const DAY = BigNumber.from(24 * 60 * 60);
 
   
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const {deployments, getNamedAccounts, network} = hre;
-    const {deploy,execute, get, log, read } = deployments;
+    const {deploy, execute, get, log, read } = deployments;
 
     const {
         deployer,
@@ -47,8 +34,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log("----------------------------------------------------");
 
 
-
-    let coreAddress = (await get('DohrniiCore')).address;
     let wethAddress: string
 
     if(hre.network.tags.test || hre.network.tags.staging) {
@@ -70,73 +55,50 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     const syntheticAddress = (await get('Fei')).address;
 
-    const pairAddress = await read(
+
+    let coreAddress = (await get('DohrniiCore')).address;
+    let pcvDepositAddress = (await get('UniswapPCVDeposit')).address;
+    let FeiPerEthOracle = (await get('FeiPerEthUniswapOracle')).address;
+    let pairAddress =  await read(
         'UniswapV2Factory',
         'getPair',
-        wethAddress,
-        syntheticAddress
+        syntheticAddress,
+        wethAddress
+        
     )
+    
 
+        
+    /// @notice UniswapPCVController constructor
     /// @param _core Fei Core for reference
-    /// @param _pair Uniswap Pair to provide TWAP
-    /// @param _duration TWAP duration
-    /// @param _isPrice0 flag for using token0 or token1 for cumulative on Uniswap
-    const  OracleArgs : any[] =  [
-        coreAddress,
+    /// @param _pcvDeposit PCV Deposit to reweight
+    /// @param _oracle oracle for reference
+    /// @param _backupOracle the backup oracle to reference
+    /// @param _incentiveAmount amount of FEI for triggering a reweight
+    /// @param _minDistanceForReweightBPs minimum distance from peg to reweight in basis points
+    /// @param _pair Uniswap pair contract to reweight
+    /// @param _reweightFrequency the frequency between reweights
+
+    const  PCVControllerArgs : any[] =  [
+        coreAddress, 
+        pcvDepositAddress,
+        //TODO: consider using chainlinkEthUsdOracleWrapperAddress
+        FeiPerEthOracle, //    address _oracle,
+        FeiPerEthOracle,  //   address _backupOracle,
+        200,
+        500,
         pairAddress,
-        DAY, //1 day
-        true //isPrice0
+        14400  //  every 4 hours     uint256 _frequency 
     ];
+
   
-    const UniswapOracleResult = await deploy("FeiPerEthUniswapOracle", {
-        contract: 'UniswapOracle', 
+    const PCVControllerResult = await deploy("UniswapPCVController", {
+        contract: 'UniswapPCVController', 
         from: deployer,
-        args: OracleArgs,
+        args: PCVControllerArgs,
         log: true,
         deterministicDeployment: false,
     });
-
-
-
-    if(hre.network.tags.test) {
-
-        await execute(
-            'FeiPerEthUniswapOracle',
-            {from: deployer, log: true}, 
-            "update"
-        );
-    
-    
-        let peg: BigNumber = await read(
-            'FeiPerEthUniswapOracle',
-            "read"
-        )
-    
-    
-        log(`Price 0 - peg(before): ${chalk.green(peg)}`);
-
-        await advanceTimeAndBlock(2*DAY.toNumber());
-
-        await execute(
-            'FeiPerEthUniswapOracle',
-            {from: deployer, log: true}, 
-            "update"
-        );
-    
-    
-        peg = await read(
-            'FeiPerEthUniswapOracle',
-            "read"
-        )
-    
-    
-        log(`Price 0 - peg(After): ${chalk.green(peg)}`);
-    }
-
-   
-
-
-
 
     log(chalk.yellow("We may update these following addresses at hardhatconfig.ts "));
     log("------------------ii---------ii---------------------")
@@ -144,23 +106,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log("------------------ii---------ii---------------------")
 
 
+    if (PCVControllerResult.newlyDeployed) {
 
-
-    if (UniswapOracleResult.newlyDeployed) {
-
-        log(`Uniswap Oracle contract address: ${chalk.green(UniswapOracleResult.address)} at key unioracle using ${UniswapOracleResult.receipt?.gasUsed} gas`);
+        log(`uni-pcv-controller contract address: ${chalk.green(PCVControllerResult.address)} at key uni-pcv-controller using ${PCVControllerResult.receipt?.gasUsed} gas`);
 
         if(hre.network.tags.production || hre.network.tags.staging){
             await hre.run("verify:verify", {
-            address: UniswapOracleResult.address,
-            constructorArguments: OracleArgs,
+            address: PCVControllerResult.address,
+            constructorArguments: PCVControllerArgs,
             });
         }
+
 
     }
 };
 export default func;
-func.tags = ["3-1","UniswapOracle", "oracle"];
-func.dependencies = ['AMM'];
-
+func.tags = ["5-2","uni-controller", "pcv"];
+func.dependencies = ['5-1'];
 // func.skip = async () => true;

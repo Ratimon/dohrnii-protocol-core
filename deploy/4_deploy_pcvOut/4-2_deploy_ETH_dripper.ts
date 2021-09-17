@@ -1,25 +1,22 @@
 import chalk from 'chalk';
-// Defining bytecode and abi from original contract on mainnet to ensure bytecode matches and it produces the same pair code hash
-// const {
-//     bytecode,
-//     abi,
-//   } = require("../deployments/mainnet/UniswapV2Factory.json");
-
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 
 import {
+    BigNumber,
     utils,
 } from 'ethers';
 
 const { 
+    parseEther,
     formatUnits,
 } = utils;
+
   
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const {deployments, getNamedAccounts, network} = hre;
-    const {deploy, log, read } = deployments;
+    const {deploy, execute, get, log, read } = deployments;
 
     const {
         deployer,
@@ -36,18 +33,27 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log(`Network Name: ${network.name}`);
     log("----------------------------------------------------");
 
-    const  FactoryArgs : any[] =  [
-        dev,
+
+    let coreAddress = (await get('DohrniiCore')).address;
+    let reserveStabilizerAddress = (await get('EthReserveStabilizer')).address;
+
+   /// @param _core Fei Core for reference
+   /// @param _target address to drip to
+   /// @param _frequency frequency of dripping
+   /// @param _amountToDrip amount to drip on each drip
+
+    const  DripperArgs : any[] =  [
+        coreAddress, 
+        reserveStabilizerAddress, //     address _oracle,
+        7200,  //drip every 2 hours     uint256 _frequency 
+        parseEther('1'), //     uint256 _amountToDrip
     ];
+
   
-    const FactoryResult = await deploy("UniswapV2Factory", {
-    //   contract: {
-    //     abi,
-    //     bytecode,
-    //   },
-        contract: 'UniswapV2Factory', 
+    const DripperResult = await deploy("EthPCVDripper", {
+        contract: 'EthPCVDripper', 
         from: deployer,
-        args: FactoryArgs,
+        args: DripperArgs,
         log: true,
         deterministicDeployment: false,
     });
@@ -58,28 +64,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log("------------------ii---------ii---------------------")
 
 
-    if (FactoryResult.newlyDeployed) {
+    if (DripperResult.newlyDeployed) {
 
-        log(`UniswapV2Factory contract address: ${chalk.green(FactoryResult.address)} at key factory using ${FactoryResult.receipt?.gasUsed} gas`);
+        log(`dripper contract address: ${chalk.green(DripperResult.address)} at key dripper using ${DripperResult.receipt?.gasUsed} gas`);
 
         if(hre.network.tags.production || hre.network.tags.staging){
             await hre.run("verify:verify", {
-            address: FactoryResult.address,
-            constructorArguments: FactoryArgs,
+            address: DripperResult.address,
+            constructorArguments: DripperArgs,
             });
         }
-
-        const initCodePairHash = await read(
-            'UniswapV2Factory',
-            'INIT_CODE_PAIR_HASH'
-        )
-    
-        log(`We may modify initial code hash in  ${chalk.yellow(`function pairFor of UniswapV2Library.sol`)} to be the same as :initCodePairHash:`,chalk.green(initCodePairHash));
 
 
     }
 };
 export default func;
-func.tags = ["2-1","factory", "AMM"];
-func.dependencies = ['core'];
+func.tags = ["4-2","dripper", "middleware"];
+func.dependencies = ['4-1'];
 // func.skip = async () => true;
