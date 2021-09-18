@@ -30,6 +30,8 @@ contract EthBondingCurve is BondingCurve {
         )
     {
         SHIFT = scale / 3; // Enforces a .50c starting price per bonding curve formula
+        //(k)^0.5 / (k + S)^0.5 = 0.5
+        //3k=S
     }
 
     /// @notice purchase FEI for underlying tokens
