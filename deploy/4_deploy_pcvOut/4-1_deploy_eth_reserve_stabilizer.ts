@@ -105,6 +105,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
 };
 export default func;
-func.tags = ["4-1","reserve", "middleware"];
+func.tags = ["4-1","reserve", "pcv-out"];
 func.dependencies = ['oracle'];
 // func.skip = async () => true;

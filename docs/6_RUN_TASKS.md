@@ -21,7 +21,7 @@ Compilation finished successfully
 Run using:
 
 ```
-yarn hardhat verify --network bscTestnet 0x7287c3c266A6Bb5d6D18022E43d28337E5bb1e7A --contract contracts/tokens/BUSDTest.sol:BUSDTest --constructor-args deploy/1_deploy_tokens/busd_arguments.js
+yarn hardhat verify --network bscTestnet <EOA address> --contract contracts/tokens/BUSDTest.sol:BUSDTest --constructor-args deploy/1_deploy_tokens/busd_arguments.js
 ```
 
 
@@ -71,7 +71,7 @@ yarn hardhat --network bscTestnet accounts
 
 Run using:
 ```
-yarn hardhat --network bscTestnet  balance --account 0xD1c4373F6acAf2aCd1A874d0748845ed179E97DC
+yarn hardhat --network bscTestnet  balance --account <EOA address>
 ```
 3) **block-number** - specify the current block number
 

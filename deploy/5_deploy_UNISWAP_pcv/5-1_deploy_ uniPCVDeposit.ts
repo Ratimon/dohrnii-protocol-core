@@ -116,6 +116,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
 };
 export default func;
-func.tags = ["5-1","uni-deposit", "pcv"];
-func.dependencies = ['middleware'];
+func.tags = ["5-1","uni-deposit", "pcv-uni"];
+func.dependencies = ['pcv-out'];
 // func.skip = async () => true;
