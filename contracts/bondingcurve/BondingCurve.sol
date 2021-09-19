@@ -214,6 +214,7 @@ contract BondingCurve is IBondingCurve, OracleRef, PCVSplitter, Timed, Incentivi
         public
         view
         override
+        virtual
         returns (uint256 amountOut)
     {
         // the FEI value of the input amount
