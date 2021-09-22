@@ -163,6 +163,7 @@ contract BondingCurve is IBondingCurve, OracleRef, PCVSplitter, Timed, Incentivi
     /// @notice batch allocate held PCV
     function allocate() external override whenNotPaused {
         uint256 amount = balance();
+         // oracle : FEI per X
         uint256 usdValueHeld = readOracle().mul(amount).asUint256();
         // the premium is the USD value held multiplied by the buffer that a user would pay to get FEI assuming FEI is $1
         uint256 premium = usdValueHeld * buffer / BASIS_POINTS_GRANULARITY;
@@ -217,6 +218,7 @@ contract BondingCurve is IBondingCurve, OracleRef, PCVSplitter, Timed, Incentivi
         virtual
         returns (uint256 amountOut)
     {
+        // oracle : FEI per X
         // the FEI value of the input amount
         uint256 feiValueOfAmountIn = readOracle().mul(amountIn).asUint256();
 

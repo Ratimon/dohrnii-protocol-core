@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.4;
 
+import "hardhat/console.sol";
+
+
 import "./IUniswapPCVDeposit.sol";
 import "../PCVDeposit.sol";
 import "../../refs/UniRef.sol";
@@ -41,6 +44,11 @@ contract UniswapPCVDeposit is IUniswapPCVDeposit, PCVDeposit, UniRef {
         _approveToken(token);
         _approveToken(_pair);
 
+        // uint256 readOracle =  readOracle().asUint256();
+
+        // console.log('readOracle(): deposit',readOracle);
+
+
         maxBasisPointsFromPegLP = _maxBasisPointsFromPegLP;
         emit MaxBasisPointsFromPegLPUpdate(0, _maxBasisPointsFromPegLP);
     }
@@ -55,6 +63,7 @@ contract UniswapPCVDeposit is IUniswapPCVDeposit, PCVDeposit, UniRef {
 
         // Calculate amounts to provide liquidity
         uint256 tokenAmount = IERC20(token).balanceOf(address(this));
+        // oracle : FEI per X
         uint256 feiAmount = readOracle().mul(tokenAmount).asUint256();
 
         _addLiquidity(tokenAmount, feiAmount);

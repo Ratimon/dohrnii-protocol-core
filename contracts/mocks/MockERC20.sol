@@ -5,7 +5,9 @@ import "../openzeppelin/token/ERC20/extensions/ERC20Burnable.sol";
 import "../openzeppelin/token/ERC20/ERC20.sol";
 
 contract MockERC20 is ERC20, ERC20Burnable {
-    constructor() ERC20("MockToken", "MCT") {}
+    constructor(
+       string memory tokenName
+    ) ERC20(tokenName, "MCT") {}
 
     function mint(address account, uint256 amount) public returns (bool) {
         _mint(account, amount);

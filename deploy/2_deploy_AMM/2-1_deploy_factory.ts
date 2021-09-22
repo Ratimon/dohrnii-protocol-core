@@ -83,3 +83,10 @@ export default func;
 func.tags = ["2-1","factory", "AMM"];
 func.dependencies = ['core'];
 // func.skip = async () => true;
+func.skip = async function (hre: HardhatRuntimeEnvironment) {
+    if(hre.network.tags.production){
+        return true;
+    } else{
+        return false;
+    }
+};

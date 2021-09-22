@@ -4,7 +4,9 @@ pragma solidity ^0.8.4;
 import "./MockERC20.sol";
 
 contract MockWeth is MockERC20 {
-    constructor() {}
+    constructor(
+        string memory tokenName
+    ) MockERC20(tokenName) {}
 
     function deposit() external payable {
     	mint(msg.sender, msg.value);

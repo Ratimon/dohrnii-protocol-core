@@ -21,8 +21,15 @@ const {
 } = utils;
 
 
-// import jsonabi from "../../src/abis/external/erc20.json";
-import jsonabi from "../../src/abis/external/wbnb.json";
+import jsonabi from "../../src/abis/external/erc20.json";
+// import jsonabi from "../../src/abis/external/wbnb.json";
+// import jsonabi from "../../src/abis/external/uni-factory.json";
+// import jsonabi from "../../src/abis/external/uni-pair.json";
+// import jsonabi from "../../src/abis/external/uni-router.json";
+
+// import jsonabi from "../../src/abis/external/oracle-ref.json";
+
+
 
 
 async function main(): Promise<void> {
@@ -30,7 +37,7 @@ async function main(): Promise<void> {
     // If this runs in a standalone fashion you may want to call compile manually
     // to make sure everything is compiled
     // await run("compile");
-    const name = "weth"
+    const name = "erc20"
     const iface = new Interface(jsonabi);
 
     console.log('formatedAbi',iface.format(FormatTypes.full));

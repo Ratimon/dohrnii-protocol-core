@@ -33,7 +33,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log("----------------------------------------------------")
   
     const  WETHArgs : any[] =  [
-
+      "MockWeth"
     ]
 
 
@@ -54,7 +54,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   
     if (WETHResult.newlyDeployed) {
       
-      log(`weth contract address (MockWeth): ${WETHResult.address} at key weth `);
+      log(`weth contract address (MockWeth): ${chalk.green(WETHResult.address)} at key weth using ${WETHResult.receipt?.gasUsed} gas`);
 
       if(hre.network.tags.production || hre.network.tags.staging){
         await hre.run("verify:verify", {

@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.4;
 
+import "hardhat/console.sol";
+
+
 import "./IOracleRef.sol";
 import "./CoreRef.sol";
 import "../openzeppelin/utils/math/SafeCast.sol";
@@ -85,6 +88,10 @@ abstract contract OracleRef is IOracleRef, CoreRef {
     /// @dev the peg is defined as FEI per X with X being ETH, dollars, etc
     function readOracle() public view override returns (Decimal.D256 memory) {
         (Decimal.D256 memory _peg, bool valid) = oracle.read();
+
+        // console.log('_peg -before invert', _peg.asUint256());
+
+
         if (!valid && address(backupOracle) != address(0)) {
             (_peg, valid) = backupOracle.read();
         }
@@ -135,13 +142,15 @@ abstract contract OracleRef is IOracleRef, CoreRef {
     function _setDecimalsNormalizer(int256 newDecimalsNormalizer) internal {
         int256 oldDecimalsNormalizer = decimalsNormalizer;
         decimalsNormalizer = newDecimalsNormalizer;
+
+         console.logInt(newDecimalsNormalizer) ;
+
         emit DecimalsNormalizerUpdate(oldDecimalsNormalizer, newDecimalsNormalizer);
     }
 
     function _setDecimalsNormalizerFromToken(address token) internal {
         int256 feiDecimals = 18;
         int256 _decimalsNormalizer = feiDecimals - int256(uint256(IERC20Metadata(token).decimals()));
-        
         if (doInvert) {
             _decimalsNormalizer = -1 * _decimalsNormalizer;
         }

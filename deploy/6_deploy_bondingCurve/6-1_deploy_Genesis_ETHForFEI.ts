@@ -8,17 +8,13 @@ import {
     BigNumber,
     utils,
 } from 'ethers';
+import { parseEther } from '@ethersproject/units';
 
 const { 
     formatUnits,
 } = utils;
 
 
-import {
-    advanceTimeAndBlock
-} from "../../utils";
-
-const DAY = BigNumber.from(24 * 60 * 60);
   
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const {deployments, getNamedAccounts, network} = hre;
@@ -39,19 +35,22 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log(`Network Name: ${network.name}`);
     log("----------------------------------------------------");
 
+
+
     let wethAddress: string;
 
-    let coreAddress : string;
-    let syntheticAddress : string = (await get('Fei')).address;
+    let coreAddress: string;
+    let syntheticAddress: string;
 
-    let pairAddress: string;
+    let pairAddress : string;
 
-    let EthPerFeiOracleAddress: string
+    let FeiPerEthOracle: string 
+    let UniPCVDepositAddress: string 
+    let EthPCVDripperAddress: string 
 
     let pairFeiEthContract : ethers.Contract;
     let syntheticTokenContract : ethers.Contract;
     let wethTokenContract : ethers.Contract;
-
 
     const erc20abi = [
         'constructor()',
@@ -117,60 +116,76 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         'function transferFrom(address from, address to, uint256 value) returns (bool)'
       ]
 
-
-    if(hre.network.tags.test || hre.network.tags.staging) {
+      if(hre.network.tags.test || hre.network.tags.staging) {
         try {
-
             wethAddress  = (await get('MockWeth')).address;
-            syntheticAddress  = (await get('Fei')).address;
-
-            pairAddress = await read(
-                'UniswapV2Factory',
-                'getPair',
-                wethAddress,
-                syntheticAddress
-            )
-
         } catch  (e) {
             log(chalk.red('Warning: fail trying getting artifacts from deployments, now resusing addresses from hardhat.config.ts'))
             const accounts = await getNamedAccounts();
             wethAddress  =  accounts.weth;
-            syntheticAddress  = accounts.fei;
-            pairAddress  =  accounts.pair_fei_eth;
         }
       }
     else if  (hre.network.tags.production) {
-  
           const accounts = await getNamedAccounts();
           wethAddress  =  accounts.weth;
-          syntheticAddress  = accounts.fei;
-          pairAddress  =  accounts.pair_fei_eth;
       }
     else {
         throw "Wrong tags";
     }
 
-    coreAddress = (await get('DohrniiCore')).address;
-    EthPerFeiOracleAddress = (await get('Eth-Fei_UniswapOracle')).address;
+   
+
+    
 
     /// @param _core Fei Core to reference
-    /// @param _oracle the ETH price oracle to reference
+    /// @param _oracle the price oracle to reference
     /// @param _backupOracle the backup oracle to reference
-    /// @param _usdPerFeiBasisPoints the USD price per FEI to sell ETH at
-    const  ReserveArgs : any[] =  [
+    // [
+    /// @param _scale the Scale target where peg fixes
+    // @param _buffer the buffer applied to FEI purchases after reaching scale in basis points (1/10000)
+    /// @param _discount the discount applied to FEI purchases before reaching scale in basis points (1/10000)
+    /// @param _duration the duration between incentivizing allocations
+    /// @param _incentive the amount rewarded to the caller of an allocation
+    /// @param _pcvDeposits the PCV Deposits for the PCVSplitter
+    /// @param _ratios the ratios for the PCVSplitter
+   
+    // ]   
+
+    // struct BondingCurveParams {
+    //     uint256 scale;
+    //     uint256 buffer;
+    //     uint256 discount;
+    //     uint256 duration;
+    //     uint256 incentive;
+    //     address[] pcvDeposits;
+    //     uint256[] ratios;
+    // }
+
+    coreAddress = (await get('DohrniiCore')).address;
+    FeiPerEthOracle = (await get('Eth-Fei_UniswapOracle')).address;
+    UniPCVDepositAddress = (await get('UniswapPCVDeposit')).address;
+    EthPCVDripperAddress = (await get('EthPCVDripper')).address;
+
+    const  BondingCurveArgs : any[] =  [
         coreAddress, 
-        //TODO: consider using chainlinkEthUsdOracleWrapperAddress
-        EthPerFeiOracleAddress, //    address _oracle,
-        EthPerFeiOracleAddress,  //   address _backupOracle,
-        9900, //     uint256 _usdPerFeiBasisPoints,
-        wethAddress
+        FeiPerEthOracle,
+        FeiPerEthOracle,
+        [
+            parseEther(`50000000`), // 50M Scale
+            100, // post-scale buffer 1%
+            30, // pre-scale discount .30%
+            604800, // 1 week between incentives
+            parseEther('100'), // 100 FEI reward            
+            [UniPCVDepositAddress, EthPCVDripperAddress],
+            [8000, 2000], // 80% to uniswap deposit 20% to dripper
+        ] 
     ];
 
   
-    const ReserveResult = await deploy("EthReserveStabilizer", {
-        contract: 'EthReserveStabilizer', 
+    const BondingCurveResult = await deploy("GenesisEthBondingCurve", {
+        contract: 'GenesisEthBondingCurve', 
         from: deployer,
-        args: ReserveArgs,
+        args: BondingCurveArgs,
         log: true,
         deterministicDeployment: false,
     });
@@ -181,59 +196,27 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log("------------------ii---------ii---------------------")
 
 
-    if (ReserveResult.newlyDeployed) {
+    if (BondingCurveResult.newlyDeployed) {
 
-        log(`reserve contract address: ${chalk.green(ReserveResult.address)} at key reserve using ${ReserveResult.receipt?.gasUsed} gas`);
+        log(`bondingcurve-fei-eth contract address: ${chalk.green(BondingCurveResult.address)} at key bondingcurve-fei-eth using ${BondingCurveResult.receipt?.gasUsed} gas`);
 
         if(hre.network.tags.production || hre.network.tags.staging){
             await hre.run("verify:verify", {
-            address: ReserveResult.address,
-            constructorArguments: ReserveArgs,
+            address: BondingCurveResult.address,
+            constructorArguments: BondingCurveArgs,
             });
         }
 
-        pairFeiEthContract = await hre.ethers.getContractAt(pairabi, pairAddress);
+        syntheticAddress = (await get('Fei')).address;
 
 
-        // const token0 = await pairFeiEthContract.token0();
-        // const token1 = await pairFeiEthContract.token1();
-    
-        // console.log('token0',token0);
-        // console.log('token1',token1);
-        // console.log('wethAddress',wethAddress);
-        // console.log('syntheticAddress',syntheticAddress);
-
-        // let currentDoInvert = await read(
-        //     'EthReserveStabilizer',
-        //     'doInvert'
-        // )
-
-        // It should be oracle : X per FEI
-
-        // const pricePerToken = syntheticAddress
-
-        // console.log('doInvert: before', chalk.yellow(`${currentDoInvert}`))
-
-        // if(token0 != pricePerToken ) {
-
-
-        //     await execute(
-        //         'EthReserveStabilizer',
-        //         {from: deployer, log: true}, 
-        //         "setDoInvert",
-        //         !currentDoInvert
-        //     );
+        pairAddress =  await read(
+            'UniswapV2Factory',
+            'getPair',
+            syntheticAddress,
+            wethAddress
             
-
-        // } 
-
-        // currentDoInvert = await read(
-        //     'EthReserveStabilizer',
-        //     'doInvert'
-        // )
-
-        // console.log('doInvert: After', chalk.green(`${currentDoInvert}`));
-
+        )
 
         pairFeiEthContract = await hre.ethers.getContractAt(pairabi, pairAddress);
 
@@ -247,32 +230,29 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         const syntheticTokenName = await syntheticTokenContract.name();
         const wethTokenName = await wethTokenContract.name();
 
+
         let currentDoInvert = await read(
-            'EthReserveStabilizer',
+            'GenesisEthBondingCurve',
             'doInvert'
         )
 
 
-
         console.log('doInvert: Before', chalk.green(`${currentDoInvert}`));
 
-        // default value of reserve stabilizer is true
+        // true && token0 = syntheticAddress => FEI / ETH 
+        // true && token1 = syntheticAddress => ETH / FEI  fix to  FEI / ETH
+        // false && token0 = ETH => FEI / ETH   nofix 
+        // false && token1 = ETH => ETH / FEI  fix to  FEI / ETH
+        log(chalk.red( `default value of reserve stabilizer is false`));
 
-        // true && token0 = syntheticAddress => FEI / ETH  fix to  ETH / FEI
-        // true && token1 = syntheticAddress => ETH / FEI  no fix
-        // false && token0 = ETH => FEI / ETH  fix to  ETH / FEI
-        // false && token1 = ETH => ETH / FEI  nofix
 
-
-        // set oracle to be : X per FEI
-        log(chalk.red( `default value of reserve stabilizer is true`));
-
-        if((currentDoInvert && (token0Address == syntheticAddress))
-            || (!currentDoInvert && (token0Address == wethAddress)) ) {
-            log(chalk.blue( `The oracle is represented in ${syntheticTokenName} per ${wethTokenName}`));
+        // set oracle to be : FEI per ETH
+        if((currentDoInvert && (token1Address == syntheticAddress))
+            || (!currentDoInvert && (token1Address == wethAddress)) ) {
+            log(chalk.blue( `The oracle is represented in ${wethTokenName} per ${syntheticTokenName}`));
 
             let readOracle =  await read(
-                'EthReserveStabilizer',
+                'GenesisEthBondingCurve',
                 "readOracle",
             )
 
@@ -280,17 +260,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 
             log(`.. Fixing .. by inverting`);
-
+            // GenesisEthBondingCurve
 
             await execute(
-                'EthReserveStabilizer',
+                'GenesisEthBondingCurve',
                 {from: deployer, log: true}, 
                 "setDoInvert",
                 !currentDoInvert
             );
 
             currentDoInvert = await read(
-                'EthReserveStabilizer',
+                'GenesisEthBondingCurve',
                 'doInvert'
             )
 
@@ -298,29 +278,24 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 
             readOracle =  await read(
-                'EthReserveStabilizer',
+                'GenesisEthBondingCurve',
                 "readOracle",
             )
 
             console.log('readOracle: After invert', chalk.green(`${readOracle}`));
 
-            log(chalk.blue( `The oracle is fixed to ${wethTokenName} per ${syntheticTokenName}`));
+            log(chalk.blue( `The oracle is fixed to ${syntheticTokenName} per ${wethTokenName}`));
 
 
         } else {
-            log(chalk.blue( `The oracle is already represented in ${wethTokenName} per ${syntheticTokenName}`));
+            log(chalk.blue( `The oracle is already represented in ${syntheticTokenName} per ${wethTokenName}`));
             log(`Nothing to fix`);
 
         }
 
 
-
-
-
-
     }
 };
 export default func;
-func.tags = ["4-1","reserve", "pcv-out"];
-func.dependencies = ['oracle'];
-// func.skip = async () => true;
+func.tags = ["6-1","genesis-ETH:FEI", "bondingcurve"];
+func.dependencies = ['pcv-uni'];
