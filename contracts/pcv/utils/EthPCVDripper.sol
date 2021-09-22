@@ -70,4 +70,13 @@ contract EthPCVDripper is CoreRef, Timed {
    function isTargetBalanceLow() public view returns(bool) {
        return target.balance < amountToDrip;
    }
+
+       /// @notice no-op
+    function deposit() external virtual {}
+
+    /// @notice returns total balance of PCV in the Deposit
+    function balance() public view virtual  returns (uint256) {
+        return address(this).balance;
+    }
+
 }

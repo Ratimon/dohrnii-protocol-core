@@ -34,8 +34,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log(`Network Name: ${network.name}`);
     log("----------------------------------------------------")
     
-    let factoryAddress = (await get('UniswapV2Factory')).address
-    let libraryPath
+    let factoryAddress: string
+    let libraryPath: string
     let wethAddress: string
 
     if(hre.network.tags.test || hre.network.tags.staging) {
@@ -55,11 +55,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         
         }
       }
-    else if  (hre.network.tags.production) {
+    // else if  (hre.network.tags.production) {
   
-        const accounts = await getNamedAccounts();
-        wethAddress  =  accounts.weth;
-    }
+    //     const accounts = await getNamedAccounts();
+    //     wethAddress  =  accounts.weth;
+    // }
     else {
         throw "Wrong tags";
     }
@@ -69,6 +69,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         contract: `contracts/${libraryPath}`,
         from: deployer,
     });
+
+    factoryAddress = (await get('UniswapV2Factory')).address
 
     const  RouterArgs : any[] =  [
         factoryAddress,
@@ -112,3 +114,10 @@ export default func;
 func.tags = ["2-3",'router','AMM'];
 func.dependencies = ['2-2'];
 // func.skip = async () => true;
+func.skip = async function (hre: HardhatRuntimeEnvironment) {
+    if(hre.network.tags.production){
+        return true;
+    } else{
+        return false;
+    }
+};
