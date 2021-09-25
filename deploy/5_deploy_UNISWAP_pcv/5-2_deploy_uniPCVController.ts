@@ -50,69 +50,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     let wethTokenContract : ethers.Contract;
 
     const erc20abi = [
-        'constructor()',
-        'event Approval(address indexed owner, address indexed spender, uint256 value)',
-        'event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)',
-        'event Transfer(address indexed from, address indexed to, uint256 value)',
-        'function _decimals() view returns (uint8)',
-        'function _name() view returns (string)',
-        'function _symbol() view returns (string)',
-        'function allowance(address owner, address spender) view returns (uint256)',
-        'function approve(address spender, uint256 amount) returns (bool)',
-        'function balanceOf(address account) view returns (uint256)',
-        'function burn(uint256 amount) returns (bool)',
-        'function decimals() view returns (uint8)',
-        'function decreaseAllowance(address spender, uint256 subtractedValue) returns (bool)',
-        'function getOwner() view returns (address)',
-        'function increaseAllowance(address spender, uint256 addedValue) returns (bool)',
-        'function mint(uint256 amount) returns (bool)',
         'function name() view returns (string)',
-        'function owner() view returns (address)',
-        'function renounceOwnership()',
-        'function symbol() view returns (string)',
-        'function totalSupply() view returns (uint256)',
-        'function transfer(address recipient, uint256 amount) returns (bool)',
-        'function transferFrom(address sender, address recipient, uint256 amount) returns (bool)',
-        'function transferOwnership(address newOwner)'
       ]
 
+
     const pairabi = [
-        'constructor()',
-        'event Approval(address indexed owner, address indexed spender, uint256 value)',
-        'event Burn(address indexed sender, uint256 amount0, uint256 amount1, address indexed to)',
-        'event Mint(address indexed sender, uint256 amount0, uint256 amount1)',
-        'event Swap(address indexed sender, uint256 amount0In, uint256 amount1In, uint256 amount0Out, uint256 amount1Out, address indexed to)',
-        'event Sync(uint112 reserve0, uint112 reserve1)',
-        'event Transfer(address indexed from, address indexed to, uint256 value)',
-        'function DOMAIN_SEPARATOR() view returns (bytes32)',
-        'function MINIMUM_LIQUIDITY() view returns (uint256)',
-        'function PERMIT_TYPEHASH() view returns (bytes32)',
-        'function allowance(address, address) view returns (uint256)',
-        'function approve(address spender, uint256 value) returns (bool)',
-        'function balanceOf(address) view returns (uint256)',
-        'function burn(address to) returns (uint256 amount0, uint256 amount1)',
-        'function decimals() view returns (uint8)',
-        'function factory() view returns (address)',
-        'function getReserves() view returns (uint112 _reserve0, uint112 _reserve1, uint32 _blockTimestampLast)',
-        'function initialize(address _token0, address _token1)',
-        'function kLast() view returns (uint256)',
-        'function mint(address to) returns (uint256 liquidity)',
-        'function name() view returns (string)',
-        'function nonces(address) view returns (uint256)',
-        'function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)',
-        'function price0CumulativeLast() view returns (uint256)',
-        'function price1CumulativeLast() view returns (uint256)',
-        'function skim(address to)',
-        'function swap(uint256 amount0Out, uint256 amount1Out, address to, bytes data)',
-        'function symbol() view returns (string)',
-        'function sync()',
         'function token0() view returns (address)',
         'function token1() view returns (address)',
-        'function totalSupply() view returns (uint256)',
-        'function transfer(address to, uint256 value) returns (bool)',
-        'function transferFrom(address from, address to, uint256 value) returns (bool)'
       ]
-    
 
     if(hre.network.tags.test || hre.network.tags.staging) {
         try {
@@ -218,7 +163,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         // true && token1 = syntheticAddress => ETH / FEI  fix to  FEI / ETH
         // false && token0 = ETH => FEI / ETH   nofix 
         // false && token1 = ETH => ETH / FEI  fix to  FEI / ETH
-        log(chalk.red( `default value of reserve stabilizer is false`));
+        log(chalk.red( `default value of PCV controller's currentDoInvert is false`));
 
 
         // set oracle to be : FEI per ETH

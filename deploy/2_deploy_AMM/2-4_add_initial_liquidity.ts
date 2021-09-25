@@ -291,8 +291,25 @@ func.dependencies = ['2-3'];
 // func.skip = async () => true; 
 
 //or 
+
+
 // func.skip = async function (hre: HardhatRuntimeEnvironment) {
-//     if(hre.network.tags.production){
+
+//     const {getNamedAccounts} = hre;
+
+//     const {
+//         deployer,
+//     } = await getNamedAccounts();
+
+//     // fetchIfDifferent
+//     const isRouterNewlyDepoyed = await hre.deployments.fetchIfDifferent( 'UniswapV2Router02',{
+//         contract: 'UniswapV2Router02',
+//         from: deployer
+//     });
+
+
+//     if(hre.network.tags.production && isRouterNewlyDepoyed){
+//     // if(hre.network.tags.production){
 //         return true;
 //     } else{
 //         return false;

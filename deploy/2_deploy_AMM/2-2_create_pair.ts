@@ -44,14 +44,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
    
     const factoryabi =[
-        'function allPairs(uint256) view returns (address)',
-        'function allPairsLength() view returns (uint256)',
         'function createPair(address tokenA, address tokenB) returns (address pair)',
-        'function feeTo() view returns (address)',
-        'function feeToSetter() view returns (address)',
         'function getPair(address, address) view returns (address)',
-        'function setFeeTo(address _feeTo)',
-        'function setFeeToSetter(address _feeToSetter)'
       ]
 
     if(hre.network.tags.test || hre.network.tags.staging) {

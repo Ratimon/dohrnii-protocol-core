@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.4;
 
-import "hardhat/console.sol";
 
 
 import "./IUniswapPCVDeposit.sol";
@@ -44,9 +43,6 @@ contract UniswapPCVDeposit is IUniswapPCVDeposit, PCVDeposit, UniRef {
         _approveToken(token);
         _approveToken(_pair);
 
-        // uint256 readOracle =  readOracle().asUint256();
-
-        // console.log('readOracle(): deposit',readOracle);
 
 
         maxBasisPointsFromPegLP = _maxBasisPointsFromPegLP;

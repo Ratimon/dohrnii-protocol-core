@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.4;
 
-import "hardhat/console.sol";
 
 
 import "./IOracleRef.sol";
@@ -89,7 +88,6 @@ abstract contract OracleRef is IOracleRef, CoreRef {
     function readOracle() public view override returns (Decimal.D256 memory) {
         (Decimal.D256 memory _peg, bool valid) = oracle.read();
 
-        // console.log('_peg -before invert', _peg.asUint256());
 
 
         if (!valid && address(backupOracle) != address(0)) {
@@ -143,7 +141,6 @@ abstract contract OracleRef is IOracleRef, CoreRef {
         int256 oldDecimalsNormalizer = decimalsNormalizer;
         decimalsNormalizer = newDecimalsNormalizer;
 
-         console.logInt(newDecimalsNormalizer) ;
 
         emit DecimalsNormalizerUpdate(oldDecimalsNormalizer, newDecimalsNormalizer);
     }

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.4;
 
-import "hardhat/console.sol";
 
 import "./IReserveStabilizer.sol";
 import "../pcv/PCVDeposit.sol";
@@ -48,9 +47,6 @@ contract ReserveStabilizer is OracleRef, IReserveStabilizer, PCVDeposit {
 
         token = _token;
 
-        // uint256 readOracle =  readOracle().mul(1 ether).asUint256();
-
-        // console.log('readOracle() _peg-after invert: stabilizer',readOracle);
 
         if (address(_token) != address(0)) {
             _setDecimalsNormalizerFromToken(address(_token));
