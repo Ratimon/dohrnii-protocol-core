@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.4;
 
-import "hardhat/console.sol";
 
 // Referencing Uniswap Example Simple Oracle
 // https://github.com/Uniswap/uniswap-v2-periphery/blob/master/contracts/examples/ExampleOracleSimple.sol
@@ -33,7 +32,7 @@ contract UniswapOracle is IUniswapOracle, CoreRef {
 
     uint256 private constant FIXED_POINT_GRANULARITY = 2**112;
     // uint256 private constant USDC_DECIMALS_MULTIPLIER = 1e12; // to normalize USDC and ETH wei units
-    uint256 private constant USDC_DECIMALS_MULTIPLIER = 1; // to normalize USDC and ETH wei units
+    uint256 private constant DECIMALS_MULTIPLIER = 1; // to normalize FEI and ETH wei units
 
 
     /// @notice UniswapOracle constructor
@@ -79,7 +78,7 @@ contract UniswapOracle is IUniswapOracle, CoreRef {
         unchecked {
             deltaCumulative = (currentCumulative - priorCumulative); // allowing underflow per Uniswap Oracle spec
         }
-        deltaCumulative = deltaCumulative * USDC_DECIMALS_MULTIPLIER; 
+        deltaCumulative = deltaCumulative * DECIMALS_MULTIPLIER; 
 
         // Uniswap stores cumulative price variables as a fixed point 112x112 so we need to divide out the granularity
         Decimal.D256 memory _twap =
@@ -112,7 +111,6 @@ contract UniswapOracle is IUniswapOracle, CoreRef {
     function read() external view override returns (Decimal.D256 memory, bool) {
         bool valid = !(paused() || twap.isZero());
 
-        // console.log('readOracle()',twap.asUint256());
 
         return (twap, valid);
     }
