@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import chalk from 'chalk';
 
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
@@ -13,10 +15,14 @@ const {
   parseUnits
 } = utils;
 
-  
-  
+let isMainnetForking: boolean
+
+if (process.env.isMainnetForking == 'true') {
+  isMainnetForking  = true;
+}
+
+
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  if(!hre.network.tags.production) {
     
     const {deployments, getNamedAccounts, network} = hre;
     const {deploy, execute , log } = deployments;
@@ -32,15 +38,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log(`Network Name: ${network.name}`);
     log("----------------------------------------------------")
   
-    const  WETHArgs : any[] =  [
-      "MockWeth"
-    ]
 
 
-    const WETHResult = await deploy("MockWeth", {
+    const  WETHArgs : {[key: string]: any} = {}; 
+    
+    WETHArgs[`tokenName`] = "MockWeth";
+
+    const WETHResult = await deploy("TokenWETH", {
         contract: "MockWeth",
         from: deployer,
-        args: WETHArgs,
+        args: Object.values(WETHArgs),
         log: true,
         skipIfAlreadyDeployed: true
       });
@@ -49,22 +56,49 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log("----------------------------------------------------")
     log("------------------ii---------ii---------------------")
     log("We may update these following addresses at hardhatconfig.ts ")
-    log(`MockETH address: ${chalk.green(WETHResult.address)} at key weth`);
     log("----------------------------------------------------")
   
     if (WETHResult.newlyDeployed) {
       
       log(`weth contract address (MockWeth): ${chalk.green(WETHResult.address)} at key weth using ${WETHResult.receipt?.gasUsed} gas`);
 
+      for(var i in WETHArgs){
+        log(chalk.yellow( `Argument: ${i} - value: ${WETHArgs[i]}`));
+      }
+
       if(hre.network.tags.production || hre.network.tags.staging){
         await hre.run("verify:verify", {
           address: WETHResult.address,
-          constructorArguments: WETHArgs,
+          constructorArguments: Object.values(WETHArgs),
         });
       }
       
     }  
-  };
 }
 export default func;
-func.tags = ["0-1",'mock'];
+func.tags = ["0-1","weth",'token'];
+
+func.skip = async function (hre: HardhatRuntimeEnvironment) {
+
+
+  //not use for mainnet fork test,generate local host, or production
+  
+  //1) mainnet fork test    hre.network.name == 'hardhat' && isMainnetForking == true
+  //2) generate local host  hre.network.name == 'localhost' && isMainnetForking == true
+  //3) production           hre.network.name == 'bscMainnet' && isMainnetForking == false
+
+  //use for testnet, generate hardhat, unit test
+  //1) testnet              hre.network.name == 'bscTestnet' && isMainnetForking == false
+  //2) generate hardhat     hre.network.name == 'hardhat' && isMainnetForking == false
+  //3) unit test            hre.network.name == 'hardhat' && isMainnetForking == false
+
+
+  if( (hre.network.name == 'hardhat' && isMainnetForking)
+     || (hre.network.name == 'localhost' && isMainnetForking) 
+     || (hre.network.name == 'bscMainnet' && !isMainnetForking) ){
+        return true;
+    } else{
+        return false;
+    }
+
+};

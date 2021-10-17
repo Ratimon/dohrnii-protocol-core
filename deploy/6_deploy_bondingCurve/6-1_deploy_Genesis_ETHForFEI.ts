@@ -62,9 +62,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         'function token1() view returns (address)',
       ]
 
-      if(hre.network.tags.test || hre.network.tags.staging) {
+    if(hre.network.tags.test || hre.network.tags.staging) {
         try {
-            wethAddress  = (await get('MockWeth')).address;
+            wethAddress  = (await get('TokenWETH')).address;
         } catch  (e) {
             log(chalk.red('Warning: fail trying getting artifacts from deployments, now resusing addresses from hardhat.config.ts'))
             const accounts = await getNamedAccounts();
@@ -108,7 +108,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     // }
 
     coreAddress = (await get('DohrniiCore')).address;
-    FeiPerEthOracle = (await get('Eth-Fei_UniswapOracle')).address;
+    FeiPerEthOracle = (await get('WETH_FEI_UniswapOracle')).address;
     UniPCVDepositAddress = (await get('UniswapPCVDeposit')).address;
     EthPCVDripperAddress = (await get('EthPCVDripper')).address;
 
@@ -153,7 +153,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             });
         }
 
-        syntheticAddress = (await get('Fei')).address;
+        syntheticAddress = (await get('TokenFEI')).address;
 
 
         pairAddress =  await read(
@@ -190,8 +190,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         // false && token0 = ETH => FEI / ETH   nofix 
         // false && token1 = ETH => ETH / FEI  fix to  FEI / ETH
         log(chalk.red( `default value of bonding curve's currentDoInvert  is false`));
-
-
         // set oracle to be : FEI per ETH
         if((currentDoInvert && (token1Address == syntheticAddress))
             || (!currentDoInvert && (token1Address == wethAddress)) ) {

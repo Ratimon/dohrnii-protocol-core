@@ -52,7 +52,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         coreAddress
     ];
 
-    const SyntheticResult = await deploy('Fei', {
+    const SyntheticResult = await deploy('TokenFEI', {
         contract: 'Fei', 
         from: deployer,
         args: SyntheticArgs,

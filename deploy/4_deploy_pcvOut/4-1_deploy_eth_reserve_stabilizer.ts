@@ -42,7 +42,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     let wethAddress: string;
 
     let coreAddress : string;
-    let syntheticAddress : string = (await get('Fei')).address;
+    let syntheticAddress : string;
 
     let pairAddress: string;
 
@@ -64,40 +64,30 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       ]
 
 
-    if(hre.network.tags.test || hre.network.tags.staging) {
-        try {
+    try {
 
-            wethAddress  = (await get('MockWeth')).address;
-            syntheticAddress  = (await get('Fei')).address;
+        wethAddress  = (await get('TokenWETH')).address;
+        syntheticAddress  = (await get('TokenFEI')).address;
 
-            pairAddress = await read(
-                'UniswapV2Factory',
-                'getPair',
-                wethAddress,
-                syntheticAddress
-            )
+        pairAddress = await read(
+            'UniswapV2Factory',
+            'getPair',
+            wethAddress,
+            syntheticAddress
+        )
 
-        } catch  (e) {
-            log(chalk.red('Warning: fail trying getting artifacts from deployments, now resusing addresses from hardhat.config.ts'))
-            const accounts = await getNamedAccounts();
-            wethAddress  =  accounts.weth;
-            syntheticAddress  = accounts.fei;
-            pairAddress  =  accounts.pair_fei_eth;
-        }
-      }
-    else if  (hre.network.tags.production) {
-  
-          const accounts = await getNamedAccounts();
-          wethAddress  =  accounts.weth;
-          syntheticAddress  = accounts.fei;
-          pairAddress  =  accounts.pair_fei_eth;
-      }
-    else {
-        throw "Wrong tags";
+    } catch  (e) {
+        log(chalk.red('Warning: fail trying getting artifacts from deployments, now resusing addresses from hardhat.config.ts'))
+        const accounts = await getNamedAccounts();
+        wethAddress  =  accounts.weth;
+        syntheticAddress  = accounts.fei;
+        pairAddress  =  accounts.pair_weth_fei;
     }
+  
+
 
     coreAddress = (await get('DohrniiCore')).address;
-    EthPerFeiOracleAddress = (await get('Eth-Fei_UniswapOracle')).address;
+    EthPerFeiOracleAddress = (await get('WETH_FEI_UniswapOracle')).address;
 
     /// @param _core Fei Core to reference
     /// @param _oracle the ETH price oracle to reference

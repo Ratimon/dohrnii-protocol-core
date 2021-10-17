@@ -54,7 +54,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         deployer
     ];
 
-    const GovResult = await deploy('Tribe', {
+    const GovResult = await deploy('TokenTribe', {
         contract: 'Tribe', 
         from: deployer,
         args: GovArgs,
@@ -78,6 +78,33 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             constructorArguments: GovArgs,
             });
         }
+
+        const syntheticAddress = (await get('TokenFEI')).address;
+        const govAddress = (await get('TokenTribe')).address;
+    
+        await execute(
+            'DohrniiCore',
+            {from: deployer, log: true}, 
+            "init",
+            syntheticAddress,
+            govAddress
+            );
+    
+        const syntheticTokenName = 'fei';
+        const govTokenName = 'tribe';
+    
+        const syntheticTokenAddress = await read(
+            'DohrniiCore',
+            syntheticTokenName
+        )
+    
+        const govTokenAddress = await read(
+            'DohrniiCore',
+            govTokenName
+        )
+    
+        log('syntheticTokenAddress',chalk.yellow(syntheticTokenAddress));
+        log('govTokenAddress',chalk.yellow(govTokenAddress));
 
     }
 

@@ -147,6 +147,8 @@ contract UniswapPCVController is IUniswapPCVController, UniRef, Timed, Incentivi
         return _minDistanceForReweight;
     }
 
+    // oracle : FEI per X
+
     function _reweight() internal {
         (uint256 feiReserves, uint256 tokenReserves) = getReserves();
         if (feiReserves == 0 || tokenReserves == 0) {

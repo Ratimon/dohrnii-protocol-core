@@ -7,9 +7,9 @@ import {
     BigNumber,
     utils,
 } from 'ethers';
-import { parseEther } from '@ethersproject/units';
 
-const { 
+const {
+    parseEther,
     formatUnits,
 } = utils;
 
