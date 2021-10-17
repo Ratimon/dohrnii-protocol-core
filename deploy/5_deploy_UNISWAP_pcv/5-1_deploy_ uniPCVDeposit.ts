@@ -61,24 +61,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       ]
 
 
-    if(hre.network.tags.test || hre.network.tags.staging) {
-        try {
-            wethAddress  = (await get('MockWeth')).address;
-        } catch  (e) {
-            log(chalk.red('Warning: fail trying getting artifacts from deployments, now resusing addresses from hardhat.config.ts'))
-            const accounts = await getNamedAccounts();
-            wethAddress  =  accounts.weth;
-        }
-      }
-    else if  (hre.network.tags.production) {
-          const accounts = await getNamedAccounts();
-          wethAddress  =  accounts.weth;
-      }
-    else {
-        throw "Wrong tags";
+    try {
+        wethAddress  = (await get('TokenWETH')).address;
+    } catch  (e) {
+        log(chalk.red('Warning: fail trying getting artifacts from deployments, now resusing addresses from hardhat.config.ts'))
+        const accounts = await getNamedAccounts();
+        wethAddress  =  accounts.weth;
     }
 
-    syntheticAddress = (await get('Fei')).address;
+
+    syntheticAddress = (await get('TokenFEI')).address;
 
 
     coreAddress = (await get('DohrniiCore')).address;
@@ -91,7 +83,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 
     routerAddress = (await get('UniswapV2Router02')).address;
-    FeiPerEthOracle = (await get('Eth-Fei_UniswapOracle')).address;
+    FeiPerEthOracle = (await get('WETH_FEI_UniswapOracle')).address;
 
         
     /// @param _core Fei Core for reference

@@ -190,5 +190,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ["1-1",'protocol','core'];
-func.dependencies = ['mock']
+func.dependencies = ['token']
 // func.skip = async () => true;
