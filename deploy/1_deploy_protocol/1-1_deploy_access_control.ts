@@ -35,6 +35,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const {
         deployer,
     } = await getNamedAccounts();
+
+    log(chalk.cyan(`.....`));
+    log(chalk.cyan(`Starting Script.....`));
     
     log(`Deploying contracts with the account: ${deployer}`);
     
@@ -44,17 +47,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     
     
     log(`Network Name: ${network.name}`);
-    log("----------------------------------------------------")
+    log("----------------------------------------------------");    
+
     
-    const  CoreArgs : any[] =  [
+    const  CoreArgs : {[key: string]: any} = {}; 
+    
 
-    ];
-
-
-    const CoreResult = await deploy('DohrniiCore', {
+    const deploymentName = "DohrniiCore"
+    const CoreResult = await deploy(deploymentName, {
         contract: 'Core', 
         from: deployer,
-        args: CoreArgs,
+        args: Object.values(CoreArgs),
         log: true,
         deterministicDeployment: false
     });
@@ -85,20 +88,25 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     //     deterministicDeployment: true
     // });
 
-    log(chalk.yellow("We may update these following addresses at hardhatconfig.ts "));
     log("------------------ii---------ii---------------------")
     log("----------------------------------------------------")
     log("------------------ii---------ii---------------------")
+    log(`Could be found at ....`)
+    log(chalk.yellow(`/deployment/${network.name}/${deploymentName}.json`))
 
     
     if (CoreResult.newlyDeployed) {
 
-        log(`Core contract address: ${chalk.green(CoreResult.address)} at key core using ${CoreResult.receipt?.gasUsed} gas`);
+        log(`Core contract address: ${chalk.green(CoreResult.address)} using ${CoreResult.receipt?.gasUsed} gas`);
+
+        for(var i in CoreArgs){
+            log(chalk.yellow( `Argument: ${i} - value: ${CoreArgs[i]}`));
+          }
 
         if(hre.network.tags.production || hre.network.tags.staging){
             await hre.run("verify:verify", {
             address: CoreResult.address,
-            constructorArguments: CoreArgs,
+            constructorArguments: Object.values(CoreArgs),
             });
         }
 
@@ -112,6 +120,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         //     );
 
     }
+
+    log(chalk.cyan(`Ending Script.....`));
+    log(chalk.cyan(`.....`));
 
     
     // if (FeiResult.newlyDeployed) {

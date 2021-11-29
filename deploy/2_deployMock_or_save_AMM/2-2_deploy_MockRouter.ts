@@ -30,6 +30,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         deployer,
         dev
     } = await getNamedAccounts();
+
+    log(chalk.cyan(`.....`));
+    log(chalk.cyan(`Starting Script.....`));
     
     log(`Deploying contracts with the account: ${deployer}`);
     
@@ -40,9 +43,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     
     log(`Network Name: ${network.name}`);
     log("----------------------------------------------------")
-
-
-
 
     
     let libraryPath
@@ -83,8 +83,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     RouterArgs[`factory`] = factoryAddress;
     RouterArgs[`WETH`] = wethAddress;
 
-
-    const RouterResult = await deploy("UniswapV2Router02", {
+    const deploymentName = "UniswapV2Router02"
+    const RouterResult = await deploy(deploymentName, {
         contract: 'UniswapV2Router02', 
         from: deployer,
         args: Object.values(RouterArgs),
@@ -96,15 +96,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     });
 
 
-    log(chalk.yellow("We may update these following addresses at hardhatconfig.ts "));
     log("------------------ii---------ii---------------------")
     log("----------------------------------------------------")
     log("------------------ii---------ii---------------------")
+    log(`Could be found at ....`)
+    log(chalk.yellow(`/deployment/${network.name}/${deploymentName}.json`))
 
 
     if (RouterResult.newlyDeployed) {
 
-        log(`Router contract address: ${chalk.green(RouterResult.address)} at key router using ${RouterResult.receipt?.gasUsed} gas`);
+        log(`Router contract address: ${chalk.green(RouterResult.address)}  using ${RouterResult.receipt?.gasUsed} gas`);
 
         for(var i in RouterArgs){
             log(chalk.yellow( `Argument: ${i} - value: ${RouterArgs[i]}`));
@@ -201,6 +202,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             )        
 
     }
+    log(chalk.cyan(`Ending Script.....`));
+    log(chalk.cyan(`.....`));
   
 };
 export default func;

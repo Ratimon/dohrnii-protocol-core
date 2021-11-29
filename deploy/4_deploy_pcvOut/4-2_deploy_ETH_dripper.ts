@@ -22,6 +22,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         deployer,
         dev
     } = await getNamedAccounts();
+
+    log(chalk.cyan(`.....`));
+    log(chalk.cyan(`Starting Script.....`));
     
     log(`Deploying contracts with the account: ${deployer}`);
     
@@ -42,41 +45,55 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
    /// @param _frequency frequency of dripping
    /// @param _amountToDrip amount to drip on each drip
 
-    const  DripperArgs : any[] =  [
-        coreAddress, 
-        reserveStabilizerAddress, //     address _oracle,
-        7200,  //drip every 2 hours     uint256 _frequency 
-        parseEther('1'), //     uint256 _amountToDrip
-    ];
+    // const  DripperArgs : any[] =  [
+    //     coreAddress, 
+    //     reserveStabilizerAddress, //     address _oracle,
+    //     7200,  //drip every 2 hours     uint256 _frequency 
+    //     parseEther('1'), //     uint256 _amountToDrip
+    // ];
 
-  
-    const DripperResult = await deploy("EthPCVDripper", {
+    const  DripperArgs : {[key: string]: any} = {}; 
+    
+    DripperArgs[`core Address`] = coreAddress;
+    DripperArgs[`target address`] = reserveStabilizerAddress;
+    DripperArgs[`frequency`] = 7200;
+    DripperArgs[`amountToDrip`] = parseEther('1');
+
+    const deploymentName = "EthPCVDripper"
+    const DripperResult = await deploy(deploymentName, {
         contract: 'EthPCVDripper', 
         from: deployer,
-        args: DripperArgs,
+        args: Object.values(DripperArgs),
         log: true,
         deterministicDeployment: false,
     });
 
-    log(chalk.yellow("We may update these following addresses at hardhatconfig.ts "));
     log("------------------ii---------ii---------------------")
     log("----------------------------------------------------")
     log("------------------ii---------ii---------------------")
+    log(`Could be found at ....`)
+    log(chalk.yellow(`/deployment/${network.name}/${deploymentName}.json`))
 
 
     if (DripperResult.newlyDeployed) {
 
-        log(`dripper contract address: ${chalk.green(DripperResult.address)} at key dripper using ${DripperResult.receipt?.gasUsed} gas`);
+        log(`dripper contract address: ${chalk.green(DripperResult.address)} using ${DripperResult.receipt?.gasUsed} gas`);
+
+        for(var i in DripperArgs){
+            log(chalk.yellow( `Argument: ${i} - value: ${DripperArgs[i]}`));
+        }
 
         if(hre.network.tags.production || hre.network.tags.staging){
             await hre.run("verify:verify", {
             address: DripperResult.address,
-            constructorArguments: DripperArgs,
+            constructorArguments: Object.values(DripperArgs),
             });
         }
 
-
     }
+
+    log(chalk.cyan(`Ending Script.....`));
+    log(chalk.cyan(`.....`));
 };
 export default func;
 func.tags = ["4-2","dripper", "pcv-out"];

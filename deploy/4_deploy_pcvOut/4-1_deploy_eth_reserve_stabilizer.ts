@@ -28,6 +28,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         deployer,
         dev
     } = await getNamedAccounts();
+
+    log(chalk.cyan(`.....`));
+    log(chalk.cyan(`Starting Script.....`));
     
     log(`Deploying contracts with the account: ${deployer}`);
     
@@ -93,38 +96,53 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     /// @param _oracle the ETH price oracle to reference
     /// @param _backupOracle the backup oracle to reference
     /// @param _usdPerFeiBasisPoints the USD price per FEI to sell ETH at
-    const  ReserveArgs : any[] =  [
-        coreAddress, 
-        //TODO: consider using chainlinkEthUsdOracleWrapperAddress
-        EthPerFeiOracleAddress, //    address _oracle,
-        EthPerFeiOracleAddress,  //   address _backupOracle,
-        9900, //     uint256 _usdPerFeiBasisPoints,
-        wethAddress
-    ];
+    // const  ReserveArgs : any[] =  [
+    //     coreAddress, 
+    //     //TODO: consider using chainlinkEthUsdOracleWrapperAddress
+    //     EthPerFeiOracleAddress, //    address _oracle,
+    //     EthPerFeiOracleAddress,  //   address _backupOracle,
+    //     9900, //     uint256 _usdPerFeiBasisPoints,
+    //     wethAddress
+    // ];
 
-  
-    const ReserveResult = await deploy("EthReserveStabilizer", {
+
+    const  ReserveArgs : {[key: string]: any} = {}; 
+    
+    ReserveArgs[`core Address`] = coreAddress;
+    ReserveArgs[`Oracle Address`] = EthPerFeiOracleAddress;
+    ReserveArgs[`Backup Oracle Address`] = EthPerFeiOracleAddress;
+    ReserveArgs[`usdPerFeiBasisPoints`] = 9900;
+    ReserveArgs[`weth address`] = wethAddress;
+
+
+    const deploymentName = "EthReserveStabilizer"
+    const ReserveResult = await deploy(deploymentName, {
         contract: 'EthReserveStabilizer', 
         from: deployer,
-        args: ReserveArgs,
+        args: Object.values(ReserveArgs),
         log: true,
         deterministicDeployment: false,
     });
 
-    log(chalk.yellow("We may update these following addresses at hardhatconfig.ts "));
     log("------------------ii---------ii---------------------")
     log("----------------------------------------------------")
     log("------------------ii---------ii---------------------")
+    log(`Could be found at ....`)
+    log(chalk.yellow(`/deployment/${network.name}/${deploymentName}.json`))
 
 
     if (ReserveResult.newlyDeployed) {
 
-        log(`reserve contract address: ${chalk.green(ReserveResult.address)} at key reserve using ${ReserveResult.receipt?.gasUsed} gas`);
+        log(`reserve contract address: ${chalk.green(ReserveResult.address)} using ${ReserveResult.receipt?.gasUsed} gas`);
+
+        for(var i in ReserveArgs){
+            log(chalk.yellow( `Argument: ${i} - value: ${ReserveArgs[i]}`));
+          }
 
         if(hre.network.tags.production || hre.network.tags.staging){
             await hre.run("verify:verify", {
             address: ReserveResult.address,
-            constructorArguments: ReserveArgs,
+            constructorArguments: Object.values(ReserveArgs),
             });
         }
 
@@ -250,11 +268,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         }
 
 
-
-
-
-
     }
+
+    log(chalk.cyan(`Ending Script.....`));
+    log(chalk.cyan(`.....`));
 };
 export default func;
 func.tags = ["4-1","reserve", "pcv-out"];

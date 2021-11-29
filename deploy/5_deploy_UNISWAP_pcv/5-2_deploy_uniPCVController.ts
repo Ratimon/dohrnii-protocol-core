@@ -23,6 +23,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         deployer,
         dev
     } = await getNamedAccounts();
+
+    log(chalk.cyan(`.....`));
+    log(chalk.cyan(`Starting Script.....`));
     
     log(`Deploying contracts with the account: ${deployer}`);
     
@@ -90,41 +93,58 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     /// @param _pair Uniswap pair contract to reweight
     /// @param _reweightFrequency the frequency between reweights
 
-    const  PCVControllerArgs : any[] =  [
-        coreAddress, 
-        pcvDepositAddress,
-        //TODO: consider using chainlinkEthUsdOracleWrapperAddress
-        FeiPerEthOracle, //    address _oracle,
-        FeiPerEthOracle,  //   address _backupOracle,
-        200,
-        500,
-        pairAddress,
-        14400  //  every 4 hours     uint256 _frequency 
-    ];
+    // const  PCVControllerArgs : any[] =  [
+    //     coreAddress, 
+    //     pcvDepositAddress,
+    //     //TODO: consider using chainlinkEthUsdOracleWrapperAddress
+    //     FeiPerEthOracle, //    address _oracle,
+    //     FeiPerEthOracle,  //   address _backupOracle,
+    //     200,
+    //     500,
+    //     pairAddress,
+    //     14400  //  every 4 hours     uint256 _frequency 
+    // ];
 
-  
-    const PCVControllerResult = await deploy("UniswapPCVController", {
+    const  PCVControllerArgs : {[key: string]: any} = {}; 
+    
+    PCVControllerArgs[`core Address`] = coreAddress;
+    PCVControllerArgs[`pcvDeposit Address`] = pcvDepositAddress;
+    PCVControllerArgs[`Oracle Address`] = FeiPerEthOracle;
+    PCVControllerArgs[`Backup Oracle Address`] = FeiPerEthOracle;
+    PCVControllerArgs[`incentiveAmount`] = 200;
+    PCVControllerArgs[`minDistanceForReweightBPs`] = 500;
+    PCVControllerArgs[`pair Address`] = pairAddress;
+    PCVControllerArgs[`frequency`] = 14400;
+
+
+    const deploymentName = "UniswapPCVController"
+    const PCVControllerResult = await deploy(deploymentName, {
         contract: 'UniswapPCVController', 
         from: deployer,
-        args: PCVControllerArgs,
+        args: Object.values(PCVControllerArgs),
         log: true,
         deterministicDeployment: false,
     });
 
-    log(chalk.yellow("We may update these following addresses at hardhatconfig.ts "));
     log("------------------ii---------ii---------------------")
     log("----------------------------------------------------")
     log("------------------ii---------ii---------------------")
+    log(`Could be found at ....`)
+    log(chalk.yellow(`/deployment/${network.name}/${deploymentName}.json`))
 
 
     if (PCVControllerResult.newlyDeployed) {
 
-        log(`uni-pcv-controller contract address: ${chalk.green(PCVControllerResult.address)} at key uni-pcv-controller using ${PCVControllerResult.receipt?.gasUsed} gas`);
+        log(`uni-pcv-controller contract address: ${chalk.green(PCVControllerResult.address)} using ${PCVControllerResult.receipt?.gasUsed} gas`);
+
+        for(var i in PCVControllerArgs){
+            log(chalk.yellow( `Argument: ${i} - value: ${PCVControllerArgs[i]}`));
+          }
 
         if(hre.network.tags.production || hre.network.tags.staging){
             await hre.run("verify:verify", {
             address: PCVControllerResult.address,
-            constructorArguments: PCVControllerArgs,
+            constructorArguments: Object.values(PCVControllerArgs),
             });
         }
 
@@ -204,8 +224,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
         }
 
-
     }
+    log(chalk.cyan(`Ending Script.....`));
+    log(chalk.cyan(`.....`));
 };
 export default func;
 func.tags = ["5-2","uni-controller", "pcv-uni"];

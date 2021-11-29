@@ -24,6 +24,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         deployer,
         dev
     } = await getNamedAccounts();
+
+    log(chalk.cyan(`.....`));
+    log(chalk.cyan(`Starting Script.....`));
     
     log(`Deploying contracts with the account: ${deployer}`);
     
@@ -62,26 +65,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         'function token1() view returns (address)',
       ]
 
-    if(hre.network.tags.test || hre.network.tags.staging) {
-        try {
-            wethAddress  = (await get('TokenWETH')).address;
-        } catch  (e) {
-            log(chalk.red('Warning: fail trying getting artifacts from deployments, now resusing addresses from hardhat.config.ts'))
-            const accounts = await getNamedAccounts();
-            wethAddress  =  accounts.weth;
-        }
-      }
-    else if  (hre.network.tags.production) {
-          const accounts = await getNamedAccounts();
-          wethAddress  =  accounts.weth;
-      }
-    else {
-        throw "Wrong tags";
+    try {
+        wethAddress  = (await get('TokenWETH')).address;
+    } catch  (e) {
+        log(chalk.red('Warning: fail trying getting artifacts from deployments, now resusing addresses from hardhat.config.ts'))
+        const accounts = await getNamedAccounts();
+        wethAddress  =  accounts.weth;
     }
 
-   
-
-    
 
     /// @param _core Fei Core to reference
     /// @param _oracle the price oracle to reference
@@ -112,44 +103,65 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     UniPCVDepositAddress = (await get('UniswapPCVDeposit')).address;
     EthPCVDripperAddress = (await get('EthPCVDripper')).address;
 
-    const  BondingCurveArgs : any[] =  [
-        coreAddress, 
-        FeiPerEthOracle,
-        FeiPerEthOracle,
-        [
-            parseEther(`50000000`), // 50M Scale
-            100, // post-scale buffer 1%
-            30, // pre-scale discount .30%
-            604800, // 1 week between incentives
-            parseEther('100'), // 100 FEI reward            
-            [UniPCVDepositAddress, EthPCVDripperAddress],
-            [8000, 2000], // 80% to uniswap deposit 20% to dripper
-        ] 
-    ];
+    // const  BondingCurveArgs : any[] =  [
+    //     coreAddress, 
+    //     FeiPerEthOracle,
+    //     FeiPerEthOracle,
+    //     [
+    //         parseEther(`50000000`), // 50M Scale
+    //         100, // post-scale buffer 1%
+    //         30, // pre-scale discount .30%
+    //         604800, // 1 week between incentives
+    //         parseEther('100'), // 100 FEI reward            
+    //         [UniPCVDepositAddress, EthPCVDripperAddress],
+    //         [8000, 2000], // 80% to uniswap deposit 20% to dripper
+    //     ] 
+    // ];
 
-  
-    const BondingCurveResult = await deploy("GenesisEthBondingCurve", {
+    const  BondingCurveArgs : {[key: string]: any} = {}; 
+
+
+    BondingCurveArgs[`core Address`] = coreAddress;
+    BondingCurveArgs[`Oracle Address`] = FeiPerEthOracle;
+    BondingCurveArgs[`Backup Oracle Address`] = FeiPerEthOracle;
+    BondingCurveArgs[`BondingCurveParamss`] = [
+        parseEther(`50000000`), // 50M Scale
+        100, // post-scale buffer 1%
+        30, // pre-scale discount .30%
+        604800, // 1 week between incentives
+        parseEther('100'), // 100 FEI reward            
+        [UniPCVDepositAddress, EthPCVDripperAddress],
+        [8000, 2000], // 80% to uniswap deposit 20% to dripper
+    ] 
+
+    const deploymentName = "GenesisEthBondingCurve"
+    const BondingCurveResult = await deploy(deploymentName, {
         contract: 'GenesisEthBondingCurve', 
         from: deployer,
-        args: BondingCurveArgs,
+        args: Object.values(BondingCurveArgs),
         log: true,
         deterministicDeployment: false,
     });
 
-    log(chalk.yellow("We may update these following addresses at hardhatconfig.ts "));
     log("------------------ii---------ii---------------------")
     log("----------------------------------------------------")
     log("------------------ii---------ii---------------------")
+    log(`Could be found at ....`)
+    log(chalk.yellow(`/deployment/${network.name}/${deploymentName}.json`))
 
 
     if (BondingCurveResult.newlyDeployed) {
 
-        log(`bondingcurve-fei-eth contract address: ${chalk.green(BondingCurveResult.address)} at key bondingcurve-fei-eth using ${BondingCurveResult.receipt?.gasUsed} gas`);
+        log(`bondingcurve-fei-eth contract address: ${chalk.green(BondingCurveResult.address)} using ${BondingCurveResult.receipt?.gasUsed} gas`);
+
+        for(var i in BondingCurveArgs){
+            log(chalk.yellow( `Argument: ${i} - value: ${BondingCurveArgs[i]}`));
+          }
 
         if(hre.network.tags.production || hre.network.tags.staging){
             await hre.run("verify:verify", {
             address: BondingCurveResult.address,
-            constructorArguments: BondingCurveArgs,
+            constructorArguments: Object.values(BondingCurveArgs),
             });
         }
 
@@ -237,8 +249,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
         }
 
-
     }
+
+    log(chalk.cyan(`Ending Script.....`));
+    log(chalk.cyan(`.....`));
+
 };
 export default func;
 func.tags = ["6-1","genesis-ETH:FEI", "bondingcurve"];

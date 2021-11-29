@@ -27,6 +27,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const {deployments, getNamedAccounts, network} = hre;
     const {deploy, execute , log } = deployments;
     const {deployer} = await getNamedAccounts();
+
+    log(chalk.cyan(`.....`));
+    log(chalk.cyan(`Starting Script.....`));
   
     log(`Deploying contracts with the account: ${deployer}`);
   
@@ -42,9 +45,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     const  WETHArgs : {[key: string]: any} = {}; 
     
-    WETHArgs[`tokenName`] = "MockWeth";
+    WETHArgs[`tokenName`] = "MockWETH";
 
-    const WETHResult = await deploy("TokenWETH", {
+    const deploymentName = "TokenWETH"
+
+    const WETHResult = await deploy(deploymentName, {
         contract: "MockWeth",
         from: deployer,
         args: Object.values(WETHArgs),
@@ -52,15 +57,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         skipIfAlreadyDeployed: true
       });
       
-    log("------------------ii---------ii---------------------")
-    log("----------------------------------------------------")
-    log("------------------ii---------ii---------------------")
-    log("We may update these following addresses at hardhatconfig.ts ")
-    log("----------------------------------------------------")
+      log("------------------ii---------ii---------------------")
+      log("----------------------------------------------------")
+      log("------------------ii---------ii---------------------")
+      log(`Could be found at ....`)
+      log(chalk.yellow(`/deployment/${network.name}/${deploymentName}.json`))
   
     if (WETHResult.newlyDeployed) {
       
-      log(`weth contract address (MockWeth): ${chalk.green(WETHResult.address)} at key weth using ${WETHResult.receipt?.gasUsed} gas`);
+      log(`weth contract address (MockWeth): ${chalk.green(WETHResult.address)} using ${WETHResult.receipt?.gasUsed} gas`);
 
       for(var i in WETHArgs){
         log(chalk.yellow( `Argument: ${i} - value: ${WETHArgs[i]}`));
@@ -73,7 +78,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         });
       }
       
-    }  
+    }
+
+    log(chalk.cyan(`Ending Script.....`));
+    log(chalk.cyan(`.....`));
+
 }
 export default func;
 func.tags = ["0-1","weth",'token'];

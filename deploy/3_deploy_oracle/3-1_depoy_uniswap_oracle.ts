@@ -112,7 +112,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     OracleArgs[`isPrice0`] = true;
 
 
-    const UniswapOracleResult = await deploy("WETH_FEI_UniswapOracle", {
+    const deploymentName = "WETH_FEI_UniswapOracle"
+    const UniswapOracleResult = await deploy(deploymentName, {
         contract: 'UniswapOracle', 
         from: deployer,
         args: Object.values(OracleArgs),
@@ -159,16 +160,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log(`Price 0 - peg(After): ${chalk.green(peg)}`);
 
 
-    log(chalk.yellow("We may update these following addresses at hardhatconfig.ts "));
     log("------------------ii---------ii---------------------")
     log("----------------------------------------------------")
     log("------------------ii---------ii---------------------")
+    log(`Could be found at ....`)
+    log(chalk.yellow(`/deployment/${network.name}/${deploymentName}.json`))
 
 
 
     if (UniswapOracleResult.newlyDeployed) {
 
-        log(`Uniswap Oracle contract address: ${chalk.green(UniswapOracleResult.address)} at key unioracle using ${UniswapOracleResult.receipt?.gasUsed} gas`);
+        log(`Uniswap Oracle contract address: ${chalk.green(UniswapOracleResult.address)} using ${UniswapOracleResult.receipt?.gasUsed} gas`);
 
         for(var i in OracleArgs){
             log(chalk.yellow( `Argument: ${i} - value: ${OracleArgs[i]}`));
