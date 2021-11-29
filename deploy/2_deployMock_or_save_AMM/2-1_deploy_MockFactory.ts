@@ -39,6 +39,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         deployer,
         dev
     } = await getNamedAccounts();
+
+    log(chalk.cyan(`.....`));
+    log(chalk.cyan(`Starting Script.....`));
     
     log(`Deploying contracts with the account: ${deployer}`);
     
@@ -73,8 +76,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     
     FactoryArgs[`feeToSetter`] = deployer;
   
-
-    const FactoryResult = await deploy("UniswapV2Factory", {
+    const deploymentName = "UniswapV2Factory"
+    const FactoryResult = await deploy(deploymentName, {
     //   contract: {
     //     abi,
     //     bytecode,
@@ -86,15 +89,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         deterministicDeployment: false,
     });
 
-    log(chalk.yellow("We may update these following addresses at hardhatconfig.ts "));
     log("------------------ii---------ii---------------------")
     log("----------------------------------------------------")
     log("------------------ii---------ii---------------------")
+    log(`Could be found at ....`)
+    log(chalk.yellow(`/deployment/${network.name}/${deploymentName}.json`))
 
 
     if (FactoryResult.newlyDeployed) {
 
-        log(`UniswapV2Factory contract address: ${chalk.green(FactoryResult.address)} at key factory using ${FactoryResult.receipt?.gasUsed} gas`);
+        log(`UniswapV2Factory contract address: ${chalk.green(FactoryResult.address)}  using ${FactoryResult.receipt?.gasUsed} gas`);
 
         for(var i in FactoryArgs){
             log(chalk.yellow( `Argument: ${i} - value: ${FactoryArgs[i]}`));
@@ -146,6 +150,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     }
     // }
+
+    log(chalk.cyan(`Ending Script.....`));
+    log(chalk.cyan(`.....`));
 };
 export default func;
 func.tags = ["2-1","factory", "AMM"];

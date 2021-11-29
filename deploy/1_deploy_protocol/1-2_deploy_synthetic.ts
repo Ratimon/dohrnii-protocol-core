@@ -35,6 +35,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const {
         deployer,
     } = await getNamedAccounts();
+
+    log(chalk.cyan(`.....`));
+    log(chalk.cyan(`Starting Script.....`));
     
     log(`Deploying contracts with the account: ${deployer}`);
     
@@ -48,39 +51,53 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     
     const coreAddress = (await get('DohrniiCore')).address;
 
-    const  SyntheticArgs : any[] =  [
-        coreAddress
-    ];
+    // const  SyntheticArgs : any[] =  [
+    //     coreAddress
+    // ];
 
-    const SyntheticResult = await deploy('TokenFEI', {
+    const  SyntheticArgs : {[key: string]: any} = {}; 
+
+    SyntheticArgs[`Core address`] = coreAddress;
+
+
+    const deploymentName = "TokenFEI"
+    const SyntheticResult = await deploy(deploymentName, {
         contract: 'Fei', 
         from: deployer,
-        args: SyntheticArgs,
+        args: Object.values(SyntheticArgs),
         log: true,
         deterministicDeployment: false
     });
 
 
 
-    log(chalk.yellow("We may update these following addresses at hardhatconfig.ts "));
     log("------------------ii---------ii---------------------")
     log("----------------------------------------------------")
     log("------------------ii---------ii---------------------")
+    log(`Could be found at ....`)
+    log(chalk.yellow(`/deployment/${network.name}/${deploymentName}.json`))
 
 
     
     if (SyntheticResult.newlyDeployed) {
 
-        log(`Synthetic Token contract address: ${chalk.green(SyntheticResult.address)} at key synthetic using ${SyntheticResult.receipt?.gasUsed} gas`);
+        log(`Synthetic Token contract address: ${chalk.green(SyntheticResult.address)}  using ${SyntheticResult.receipt?.gasUsed} gas`);
+
+        for(var i in SyntheticArgs){
+            log(chalk.yellow( `Argument: ${i} - value: ${SyntheticArgs[i]}`));
+          }
 
         if(hre.network.tags.production || hre.network.tags.staging){
             await hre.run("verify:verify", {
             address: SyntheticResult.address,
-            constructorArguments: SyntheticArgs,
+            constructorArguments: Object.values(SyntheticArgs),
             });
         }
 
     }
+
+    log(chalk.cyan(`Ending Script.....`));
+    log(chalk.cyan(`.....`));
 
 
 

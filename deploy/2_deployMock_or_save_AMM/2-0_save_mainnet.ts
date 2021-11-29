@@ -20,50 +20,54 @@ if (process.env.isMainnetForking == 'true') {
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   
-  if(!hre.network.tags.production) {
+  // if(!hre.network.tags.production) {
     
-    const {deployments, getNamedAccounts, network} = hre;
-    const {deploy, log ,save } = deployments;
-    const {
-        deployer,
-        uniswapfactory,
-        pair_weth_fei,
-        uniswaprouter
-    } = await getNamedAccounts();
-  
-    log(`Saving contracts ....`);
-  
+  const {deployments, getNamedAccounts, network} = hre;
+  const {deploy, log ,save } = deployments;
+  const {
+      deployer,
+      uniswapfactory,
+      pair_weth_fei,
+      uniswaprouter
+  } = await getNamedAccounts();
 
-  
-    log(`Network Name: ${network.name}`);
-    log("----------------------------------------------------")
+  log(chalk.cyan(`.....`));
+  log(chalk.cyan(`Starting Script.....`));
 
-    const factorySubmission : DeploymentSubmission = {
-      abi: factoryabi,
-      address: uniswapfactory
+  log(`Saving contracts ....`);
+
+  log(`Network Name: ${network.name}`);
+  log("----------------------------------------------------")
+
+  const factorySubmission : DeploymentSubmission = {
+    abi: factoryabi,
+    address: uniswapfactory
+  }
+
+  const pairSubmission : DeploymentSubmission = {
+      abi: pairabi,
+      address: pair_weth_fei
     }
 
-    const pairSubmission : DeploymentSubmission = {
-        abi: pairabi,
-        address: pair_weth_fei
-      }
+  const routerSubmission : DeploymentSubmission = {
+      abi: routerabi,
+      address: uniswaprouter
+    }
 
-    const routerSubmission : DeploymentSubmission = {
-        abi: routerabi,
-        address: uniswaprouter
-      }
+  await save('UniswapV2Factory', factorySubmission);
+  await save('pairWethFei', pairSubmission);
+  await save('UniswapV2Router02', routerSubmission);
 
-    await save('UniswapV2Factory', factorySubmission);
-    await save('pairWethFei', pairSubmission);
-    await save('UniswapV2Router02', routerSubmission);
+  log(`Deployment Saved: UniswapV2Factory with address ${chalk.green(uniswapfactory)}`);
+  log(`Deployment Saved: pairEthFei with address ${chalk.green(pair_weth_fei)}`);
+  log(`Deployment Saved: UniswapV2Router02 with address ${chalk.green(routerSubmission)}`);
 
-    log(`Deployment Saved: UniswapV2Factory with address ${chalk.green(uniswapfactory)}`);
-    log(`Deployment Saved: pairEthFei with address ${chalk.green(pair_weth_fei)}`);
-    log(`Deployment Saved: UniswapV2Router02 with address ${chalk.green(routerSubmission)}`);
+  log(chalk.cyan(`Ending Script.....`));
+  log(chalk.cyan(`.....`));
     
 
   
-  };
+  // };
 }
 export default func;
 func.tags = ["2-0","save",'AMM'];

@@ -31,7 +31,7 @@ if (process.env.isMainnetForking == 'true') {
 
   
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  if(!hre.network.tags.production) {
+  // if(!hre.network.tags.production) {
     
     const {deployments, getNamedAccounts, network} = hre;
     const {deploy, log ,save } = deployments;
@@ -63,7 +63,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log(chalk.cyan(`.....`));
 
   
-  };
+  // };
 }
 export default func;
 func.tags = ["0-*","save",'token'];

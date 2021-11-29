@@ -23,6 +23,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         deployer,
         dev
     } = await getNamedAccounts();
+
+    log(chalk.cyan(`.....`));
+    log(chalk.cyan(`Starting Script.....`));
     
     log(`Deploying contracts with the account: ${deployer}`);
     
@@ -49,43 +52,61 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     /// @param _dripAmount amount to drip on each drip
     /// @param _incentiveAmount the FEI incentive for calling drip
 
-    const  DripPCVControllerArgs : any[] =  [
-        coreAddress, 
-        pcvDepositAddress,
-        ethReserveStabilizerAddress,
-        7200, // drip every 2 hours
-        parseEther('1'),
-        200,
-    ];
+    // const  DripPCVControllerArgs : any[] =  [
+    //     coreAddress, 
+    //     pcvDepositAddress,
+    //     ethReserveStabilizerAddress,
+    //     7200, // drip every 2 hours
+    //     parseEther('1'),
+    //     200,
+    // ];
 
-  
-    const DripPCVControllerResult = await deploy("UniswapDripPCVController", {
+    const  DripPCVControllerArgs : {[key: string]: any} = {}; 
+    
+    DripPCVControllerArgs[`core Address`] = coreAddress;
+    DripPCVControllerArgs[`source Address`] = pcvDepositAddress;
+    DripPCVControllerArgs[`target Address`] = ethReserveStabilizerAddress;
+    DripPCVControllerArgs[`frequency`] = 7200;
+    DripPCVControllerArgs[`dripAmount`] = parseEther('1');
+    DripPCVControllerArgs[`_incentiveAmount`] = 200;
+
+
+    const deploymentName = "PCVDripController"
+    const DripPCVControllerResult = await deploy(deploymentName, {
         contract: 'PCVDripController', 
         from: deployer,
-        args: DripPCVControllerArgs,
+        args: Object.values(DripPCVControllerArgs),
         log: true,
         deterministicDeployment: false,
     });
 
-    log(chalk.yellow("We may update these following addresses at hardhatconfig.ts "));
     log("------------------ii---------ii---------------------")
     log("----------------------------------------------------")
     log("------------------ii---------ii---------------------")
+    log(`Could be found at ....`)
+    log(chalk.yellow(`/deployment/${network.name}/${deploymentName}.json`))
 
 
     if (DripPCVControllerResult.newlyDeployed) {
 
-        log(`uni-drip-controller contract address: ${chalk.green(DripPCVControllerResult.address)} at key uni-drip-controller using ${DripPCVControllerResult.receipt?.gasUsed} gas`);
+        log(`uni-drip-controller contract address: ${chalk.green(DripPCVControllerResult.address)} using ${DripPCVControllerResult.receipt?.gasUsed} gas`);
+
+        for(var i in DripPCVControllerArgs){
+            log(chalk.yellow( `Argument: ${i} - value: ${DripPCVControllerArgs[i]}`));
+          }
 
         if(hre.network.tags.production || hre.network.tags.staging){
             await hre.run("verify:verify", {
             address: DripPCVControllerResult.address,
-            constructorArguments: DripPCVControllerArgs,
+            constructorArguments: Object.values(DripPCVControllerArgs),
             });
         }
 
 
     }
+
+    log(chalk.cyan(`Ending Script.....`));
+    log(chalk.cyan(`.....`));
 };
 export default func;
 func.tags = ["5-3","uni-drip", "pcv-uni"];

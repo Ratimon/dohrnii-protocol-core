@@ -23,6 +23,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         deployer,
         dev
     } = await getNamedAccounts();
+
+    log(chalk.cyan(`.....`));
+    log(chalk.cyan(`Starting Script.....`));
     
     log(`Deploying contracts with the account: ${deployer}`);
     
@@ -93,40 +96,55 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     /// @param _backupOracle the backup oracle to reference
     /// @param _maxBasisPointsFromPegLP the max basis points of slippage from peg allowed on LP deposit
 
-    const  PCVDepositArgs : any[] =  [
-        coreAddress, 
-        pairAddress,
-        routerAddress,
-        //TODO: consider using chainlinkEthUsdOracleWrapperAddress
-        FeiPerEthOracle, //    address _oracle,
-        FeiPerEthOracle,  //   address _backupOracle,
-        100, //     
+    // const  PCVDepositArgs : any[] =  [
+    //     coreAddress, 
+    //     pairAddress,
+    //     routerAddress,
+    //     //TODO: consider using chainlinkEthUsdOracleWrapperAddress
+    //     FeiPerEthOracle, //    address _oracle,
+    //     FeiPerEthOracle,  //   address _backupOracle,
+    //     100, //     
 
-    ];
+    // ];
 
-  
-    const PCVDepositResult = await deploy("UniswapPCVDeposit", {
+    const  PCVDepositArgs : {[key: string]: any} = {}; 
+    
+    PCVDepositArgs[`core Address`] = coreAddress;
+    PCVDepositArgs[`pair Address`] = pairAddress;
+    PCVDepositArgs[`router Address`] = routerAddress;
+    PCVDepositArgs[`Oracle Address`] = FeiPerEthOracle;
+    PCVDepositArgs[`Backup Oracle Address`] = FeiPerEthOracle;
+    PCVDepositArgs[`maxBasisPointsFromPegLP`] = 100;
+
+
+    const deploymentName = "UniswapPCVDeposit"
+    const PCVDepositResult = await deploy(deploymentName, {
         contract: 'UniswapPCVDeposit', 
         from: deployer,
-        args: PCVDepositArgs,
+        args: Object.values(PCVDepositArgs),
         log: true,
         deterministicDeployment: false,
     });
 
-    log(chalk.yellow("We may update these following addresses at hardhatconfig.ts "));
     log("------------------ii---------ii---------------------")
     log("----------------------------------------------------")
     log("------------------ii---------ii---------------------")
+    log(`Could be found at ....`)
+    log(chalk.yellow(`/deployment/${network.name}/${deploymentName}.json`))
 
 
     if (PCVDepositResult.newlyDeployed) {
 
-        log(`uni-pcv-deposit contract address: ${chalk.green(PCVDepositResult.address)} at key uni-pc-deposit using ${PCVDepositResult.receipt?.gasUsed} gas`);
+        log(`uni-pcv-deposit contract address: ${chalk.green(PCVDepositResult.address)} using ${PCVDepositResult.receipt?.gasUsed} gas`);
+
+        for(var i in PCVDepositArgs){
+            log(chalk.yellow( `Argument: ${i} - value: ${PCVDepositArgs[i]}`));
+          }
 
         if(hre.network.tags.production || hre.network.tags.staging){
             await hre.run("verify:verify", {
             address: PCVDepositResult.address,
-            constructorArguments: PCVDepositArgs,
+            constructorArguments:  Object.values(PCVDepositArgs),
             });
         }
 
@@ -303,8 +321,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
         // }
 
-
     }
+
+    log(chalk.cyan(`Ending Script.....`));
+    log(chalk.cyan(`.....`));
 };
 export default func;
 func.tags = ["5-1","uni-deposit", "pcv-uni"];
