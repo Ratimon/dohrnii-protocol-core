@@ -2,35 +2,43 @@
 pragma solidity ^0.8.2;
 
 import "../openzeppelin/governance/Governor.sol";
+import "../openzeppelin/governance/extensions/GovernorSettings.sol";
 import "../openzeppelin/governance/compatibility/GovernorCompatibilityBravo.sol";
 import "../openzeppelin/governance/extensions/GovernorVotesComp.sol";
 import "../openzeppelin/governance/extensions/GovernorTimelockControl.sol";
 
 
-contract DohrniiGovernorAlpha is Governor, GovernorCompatibilityBravo, GovernorVotesComp, GovernorTimelockControl {
+contract MyGovernor is Governor, GovernorSettings, GovernorCompatibilityBravo, GovernorVotesComp, GovernorTimelockControl {
     constructor(ERC20VotesComp _token, TimelockController _timelock)
         Governor("Dohrnii Governor Alpha")
+        GovernorSettings(1000 /* 1000 block */, 45818 /* 1 week */, 0)
         GovernorVotesComp(_token)
         GovernorTimelockControl(_timelock)
     {}
 
-    function votingDelay() public pure override returns (uint256) {
-        return 1; // 1 block
-    }
-
-    function votingPeriod() public pure override returns (uint256) {
-        return 201600; // 1 week
-    }
-
     function quorum(uint256 blockNumber) public pure override returns (uint256) {
-        return 4e18;
-    }
-
-    function proposalThreshold() public pure override returns (uint256) {
-        return 1e18;
+        return 1000e18;
     }
 
     // The following functions are overrides required by Solidity.
+
+    function votingDelay()
+        public
+        view
+        override(IGovernor, GovernorSettings)
+        returns (uint256)
+    {
+        return super.votingDelay();
+    }
+
+    function votingPeriod()
+        public
+        view
+        override(IGovernor, GovernorSettings)
+        returns (uint256)
+    {
+        return super.votingPeriod();
+    }
 
     function getVotes(address account, uint256 blockNumber)
         public
@@ -56,6 +64,15 @@ contract DohrniiGovernorAlpha is Governor, GovernorCompatibilityBravo, GovernorV
         returns (uint256)
     {
         return super.propose(targets, values, calldatas, description);
+    }
+
+    function proposalThreshold()
+        public
+        view
+        override(Governor, GovernorSettings)
+        returns (uint256)
+    {
+        return super.proposalThreshold();
     }
 
     function _execute(uint256 proposalId, address[] memory targets, uint256[] memory values, bytes[] memory calldatas, bytes32 descriptionHash)
