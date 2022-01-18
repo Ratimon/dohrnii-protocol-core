@@ -3,10 +3,11 @@ pragma solidity ^0.8.2;
 
 import "../openzeppelin/token/ERC20/ERC20.sol";
 import "../openzeppelin/token/ERC20/extensions/draft-ERC20Permit.sol";
-import "../openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
+// import "../openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
+import "../openzeppelin/token/ERC20/extensions/ERC20VotesComp.sol";
 
 
-contract Jelly is ERC20, ERC20Permit, ERC20Votes {
+contract Jelly is ERC20, ERC20Permit, ERC20VotesComp {
 
     /// @notice Address which may mint new tokens
     address public minter;

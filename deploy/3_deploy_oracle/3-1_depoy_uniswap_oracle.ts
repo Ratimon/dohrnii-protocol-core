@@ -79,12 +79,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         wethAddress = (await get('TokenWETH')).address;
         syntheticAddress= (await get('TokenFEI')).address;
         pairAddress = (await get('pairWethFei')).address;
-        // pairAddress = await read(
-        //     'UniswapV2Factory',
-        //     'getPair',
-        //     busdAddress,
-        //     sczAddress
-        // )
     } catch  (e) {
 
         log(chalk.red('Warning: fail trying getting artifacts from deployments, now resusing addresses from hardhat.config.ts'))
